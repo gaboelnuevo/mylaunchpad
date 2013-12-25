@@ -3,8 +3,6 @@ import os, sys
 import pygtk
 import logging
 import re
-from time import sleep
-from lxml import etree
 from appsmenu import MenuCache
 pygtk.require('2.0')
 
@@ -14,6 +12,11 @@ COL_PADDING = 32
 BUTTON_PADDING = 22
 CONTAINER_PADDING = 4
 OPACITY = 85
+
+try:
+    from lxml import etree
+except:
+    print "lxml missing, please install pyhton-lxml "
 
 try:
     import gtk
