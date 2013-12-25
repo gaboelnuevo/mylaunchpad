@@ -1,6 +1,11 @@
 #!/usr/bin/env python
-import gmenu, re, sys, os
+import re, sys, os
 from xml.sax.saxutils import escape
+
+try:
+   import gmenu
+except:
+    print "gmenu missing, please install pyhton-gmenu "
 
 HOME_PATH = os.path.realpath(os.path.expanduser('~'))
 CACHE_PATH = ".cache/mylaunchpad"
@@ -11,11 +16,16 @@ class MenuCache:
 
        self.file_name = HOME_PATH + '/' + CACHE_PATH + '/' + MENU_CACHE
 
-       if len(sys.argv) > 1:
-          menu = sys.argv[1] + '.menu'
-       else:
-          menu = 'applications.menu'
-       
+       #if len(sys.argv) > 1:
+       #   menu = sys.argv[1] + '.menu'
+       #else:
+       #   menu = 'applications.menu'
+
+       ## xdg-menu
+       menu = 'applications.menu'
+       if not os.path.exists('/etc/xdg/menus/' + menu):
+          print '/etc/xdg/menus/'+menu + ' Not found!'
+
        # write menu cache
        self.createFile(self.file_name)
        self.file=open(self.file_name,'a')
