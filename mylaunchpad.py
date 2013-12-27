@@ -44,6 +44,7 @@ class AppStore:
 	menu = MenuCache()
         self.appsmenu = menu.getMenu()
 
+
         # Get Categories
         categories = self.getCategories()
  
@@ -85,7 +86,11 @@ class AppStore:
        if not self.search.get_editable():
           self.search.set_text("")
           self.search.set_editable(True)
-
+       else:
+          #if len(self.search.get_text()) >= 3:
+              self.showResults(self.getResults(self.search.get_text()))
+          #else:
+          #  self.load('ALL')
     def add_toolbar(self, widget, categories, launcher):
 
         # create toolbar
@@ -235,6 +240,16 @@ class AppStore:
            self.buttonsContainer.set_size_request(self.buttonContainer_size_w, self.buttonContainer_size_h) 
         self.fill_buttonsContainer(apps, Page=page)   
         self.buttonsContainer.show_all()
+
+    def showResults(self, results):
+        self.buttonContainer_size_w = self.buttonsContainer.get_allocation().width
+        self.buttonContainer_size_h = self.buttonsContainer.get_allocation().height
+        if self.buttonsContainer.get_children():
+           for widget in self.buttonsContainer.get_children():
+              self.buttonsContainer.remove(widget)
+           self.buttonsContainer.set_size_request(self.buttonContainer_size_w, self.buttonContainer_size_h) 
+        self.fill_buttonsContainer(results)   
+        self.buttonsContainer.show_all()
         
     def run_command(self, command):
          print "%s pressed" %command
@@ -260,6 +275,13 @@ class AppStore:
        for item in root.xpath("/xdg-menu/menu[@id]"):
           categories.append({'id': item.attrib["id"], 'label': item.attrib["label"]})
        return categories
+
+    def getResults(self, search):
+       root = etree.parse(self.appsmenu)
+       results = []
+       for item in root.xpath("/xdg-menu/menu[@id]/item[contains(@label, '" + search + "') or contains(@id, '" + search + "') or contains(.//command, '" + search + "')]"):
+          results.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
+       return results
     
 
 
