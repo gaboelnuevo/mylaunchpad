@@ -1,4 +1,4 @@
-Full scren launcher for openbox and other stand-alone window managers.
+Full Screen launcher for openbox and other stand-alone window managers.
 
 Run with python and gtk/cairo
 
@@ -16,9 +16,8 @@ pygtk
 cairo
 lxml
 
-
 *RUN:
-make the file mylaunchpad.py excecutable and run it
+make the file mylaunchpad.py executable and run it
 
 
 *Add to panel:
