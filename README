@@ -1,0 +1,37 @@
+Full scren launcher for openbox Run with python and gtk/cairo
+
+Works with xdg-menu by default work with applications.menu of gnome-menus
+You can link another xdg-menu for example lxde-menu or debian menu with ln command:
+
+#sudo ln -s /etc/xdg/menus/lxde-applications.menu /etc/xdg/menus/applications.menu
+
+*Dependences:
+python-gmenus
+pygtk
+cairo
+lxml
+
+
+*RUN:
+make the file mylaunchpad.py excecutable and run it
+
+
+*Add to panel:
+You can add this launcher in your panel creating a .desktop  file when you click on it the launcher run and show when you chose a app the launcher hide and exit
+
+[Desktop Entry]
+Type=Application
+Name=Menu
+Comment=Menu
+GenericName=Menu
+Icon= <<Insert your icon path here>>
+Exec= <<Insert script path here>>
+If your panel is tint2 you only need add a line in your config file:
+# Each launcher_item_app must be a full path to a .desktop file
+launcher_item_app = /home/<<user>>/<<path>>/menu.desktop 
+
+
+If your panel is tint2 you only need add a line in your config file:
+
+# Each launcher_item_app must be a full path to a .desktop file
+launcher_item_app = /home/<<user>>/<<path>>/menu.desktop
