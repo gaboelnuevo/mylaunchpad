@@ -1,4 +1,9 @@
-Full scren launcher for openbox Run with python and gtk/cairo
+Full scren launcher for openbox and other stand-alone window managers.
+
+Run with python and gtk/cairo
+
+Autor: Gabriel Sabillon
+Based in oblogout code by Andrew Williams
 
 Works with xdg-menu by default work with applications.menu of gnome-menus
 You can link another xdg-menu for example lxde-menu or debian menu with ln command:
