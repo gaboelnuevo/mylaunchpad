@@ -82,17 +82,27 @@ class AppStore:
         self.fill_buttonsContainer(apps)   
         self.buttonsContainer.show_all()
 
+    def focus_out_cb(self, entry, event):
+        entry.select_region(0, len(entry.get_text()))
+        return False
+
+    def enter_callback(self, widget):
+        self.run_command(self.getResults(self.search.get_text())[0]['command'])
+
     def activate_search(self, widget=None, event=None, data=None):
        if not self.search.get_editable():
           self.search.set_text("")
           self.search.set_editable(True)
        else:
-          #if len(self.search.get_text()) >= 3:
-              self.showResults(self.getResults(self.search.get_text()))
-          #else:
-          #  self.load('ALL')
-    def add_toolbar(self, widget, categories, launcher):
+          self.showResults(self.getResults(self.search.get_text()))
+          try:
+            #self.search.set_editable(False)
+            #self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].grab_focus()
+            self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].set_relief(gtk.RELIEF_NORMAL)
+          except:
+            print "No result"
 
+    def add_toolbar(self, widget, categories, launcher):
         # create toolbar
         toolbar = gtk.HBox()
         toolbar.set_border_width(5)
@@ -100,7 +110,6 @@ class AppStore:
         # Add Categories as buttons
         button = gtk.Button("All")
         button.set_relief(gtk.RELIEF_NONE)
-        button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
         button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
         button.set_focus_on_click(False)
         button.set_border_width(0)
@@ -110,8 +119,8 @@ class AppStore:
         for category in categories:
            button = gtk.Button(category['label'])
            button.set_relief(gtk.RELIEF_NONE)
-           button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
            button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+     
            button.set_focus_on_click(False)
            button.set_border_width(0)
            button.set_property('can-focus', False)
@@ -120,7 +129,9 @@ class AppStore:
         # Add search box
         self.search = gtk.Entry()
         self.search.set_editable(False)
+        #self.search.set_property('can-focus', False)
         self.search.set_text("Start tipping...")
+        self.search.connect("activate", self.enter_callback)
         toolbar.pack_end(self.search, False, False, 5)
         # Add toolbar to widget
         widget.pack_start(toolbar, False , False, 5)
@@ -153,12 +164,12 @@ class AppStore:
         footer = gtk.HBox()
         for i in range(1,nPages+1):
                   button = gtk.Button(str(i))
-                  button.set_relief(gtk.RELIEF_NONE)
+                  button.set_relief(gtk.RELIEF_NORMAL)
                   button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
                   button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
                   button.set_focus_on_click(False)
                   button.set_border_width(0)
-                  button.set_property('can-focus', False)
+                  button.set_property('can-focus', True)
                   button.connect("clicked", self.navigate_page, lista, i)
                   paginationbox.pack_start(button, False , False, 5)
         footer.pack_start(gtk.HBox())
@@ -169,14 +180,12 @@ class AppStore:
     def fill_buttonsContainer(self, lista, Page=1):
         self.paginate(lista)
 	
-        row_widget = self.new_row(self.buttonsContainer)
+        #row_widget = self.new_row(self.buttonsContainer)
         iconCounter=0
 	rowCounter=0
 
         for item in lista[(self.maxrows*self.maxcolums)*(Page-1):(self.maxrows*self.maxcolums)*(Page)]:
                if (iconCounter)%self.maxcolums == 0:
-                  #if (rowCounter+1) > maxrows:
-                     #break
                   rowCounter+=1
                   row_widget = self.new_row(self.buttonsContainer)
                iconCounter+=1
@@ -194,10 +203,11 @@ class AppStore:
         image = gtk.Image()
         button = gtk.Button()
         button.set_relief(gtk.RELIEF_NONE)
-        button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
+        gtk.RELIEF_NORMAL
+        button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
         button.set_focus_on_click(False)
         button.set_border_width(0)
-        button.set_property('can-focus', False)
+        button.set_property('can-focus', True)
         icon_name = item['icon']
         icon = self.get_icon(icon_name)
         button.add(icon)
@@ -205,6 +215,8 @@ class AppStore:
         button.show()
         box.pack_start(button, False, False, BUTTON_PADDING)
         button.connect("clicked", self.click_button, item['command'])
+        button.connect("focus-in-event", self.in_focus)
+        button.connect("focus-out-event", self.out_focus)
 	labelString = item['label']
         ## label to big
 	if len(item['label']) > 15:
@@ -225,8 +237,13 @@ class AppStore:
         row.pack_start(box, False, False, COL_PADDING)
 
     def click_button(self, widget, command):
-        self.destroy()
         self.run_command(command)
+
+    def in_focus(self, widget, event):
+        widget.set_relief(gtk.RELIEF_NORMAL)
+
+    def out_focus(self, widget, event):
+        widget.set_relief(gtk.RELIEF_NONE)
 
     def activate_category(self, widget, category_id):
         self.load(category_id)
@@ -252,6 +269,7 @@ class AppStore:
         self.buttonsContainer.show_all()
         
     def run_command(self, command):
+         self.destroy()
          print "%s pressed" %command
          os.system(command + ' &')
 
@@ -418,6 +436,7 @@ class MyLauncher:
         self.window.move(0,0)
 
     def run_launcher(self):
+        #gtk.rc_parse('rc')
         self.window.show_all()
         gtk.main()
 
