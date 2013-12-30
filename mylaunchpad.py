@@ -48,28 +48,32 @@ class AppStore:
         #update cache in the background
         t = threading.Thread(target=menu.updateCache())  
         t.start() 
-        
-
 
         # Get Categories
         categories = self.getCategories()
- 
+        
+        
+        # Create containers
         self.mainContainer = gtk.HBox(False, 0)
 	self.buttonsContainer = gtk.VBox(False)
 
         # Get maxcolums and max rows
         self.maxcolums = self.calculate_maxcolums()
         self.maxrows = self.calculate_maxrows()
-
+        
+        # Get system font size
         self.font_style = self.buttonsContainer.get_style().font_desc.to_string()
         self.fontsize = int(re.search(r"(\d+)", self.font_style).group(1))
         
-        # Pack in the button box into the panel box, with two padder boxes
+        # Pack in the button container box into main container box, with two padder boxes
 	self.mainContainer.pack_start(gtk.HBox(), True, True)
 	self.mainContainer.pack_start(self.buttonsContainer, False, True, 0)
         self.mainContainer.pack_start(gtk.HBox(), True, True)
         
+        #add toolbar
         self.add_toolbar(mainbox, categories, launcher)
+        
+        #add main container to main box
         mainbox.pack_start(self.mainContainer)
 
         self.load("ALL")
@@ -87,10 +91,6 @@ class AppStore:
         apps = self.getApps(id_category)
         self.fill_buttonsContainer(apps)   
         self.buttonsContainer.show_all()
-
-    def focus_out_cb(self, entry, event):
-        entry.select_region(0, len(entry.get_text()))
-        return False
 
     def enter_callback(self, widget):
         self.run_command(self.getResults(self.search.get_text())[0]['command'])
@@ -146,14 +146,17 @@ class AppStore:
     def destroy(self, widget=None, event=None):
         gtk.main_quit()
         return False
+        
     #Calculate max columns 
     def calculate_maxcolums(self):   
 	maxcolums = (gtk.gdk.screen_width() / (ICON_SIZE + COL_PADDING*2 + BUTTON_PADDING*2+CONTAINER_PADDING*2))
 	return maxcolums
+	
     #Calculate max row
     def calculate_maxrows(self):   
 	maxrows = (gtk.gdk.screen_height() / (ICON_SIZE*2 + ROW_PADDING*2 + BUTTON_PADDING*2))
 	return maxrows
+	
     # Get icon
     def get_icon(self, icon_name):
         try:
