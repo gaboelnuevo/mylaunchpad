@@ -7,22 +7,28 @@ try:
 except:
     print "gmenu missing, please install pyhton-gmenu "
 
-HOME_PATH = os.path.realpath(os.path.expanduser('~'))
-CACHE_PATH = ".cache/mylaunchpad"
-MENU_CACHE = "xdg-menu-cache.xml"
+
+MENU_CACHE_FILE = "xdg-menu-cache.xml"
+CACHE_DIR = "mylaunchpad"
+
 
 class MenuCache:
-    def __init__(self):
+    def __init__(self, tag='xdg-menu', AUTO_UPDATE = True):
+       self.tag = tag
+       home_path = os.path.realpath(os.path.expanduser('~'))
+       self.cache_dir_path = home_path + '/' + ".cache/" + CACHE_DIR
 
-       self.file_name = HOME_PATH + '/' + CACHE_PATH + '/' + MENU_CACHE
+       self.file_name = self.cache_dir_path + '/' + MENU_CACHE_FILE
+       if not os.path.exists(self.file_name) or AUTO_UPDATE == True:
+          self.updateCache()
 
-       #if len(sys.argv) > 1:
-       #   menu = sys.argv[1] + '.menu'
-       #else:
-       #   menu = 'applications.menu'
+    def updateCache(self):
+       if len(sys.argv) > 1:
+          menu = sys.argv[1] + '.menu'
+       else:
+          menu = 'applications.menu'
 
        ## xdg-menu
-       menu = 'applications.menu'
        if not os.path.exists('/etc/xdg/menus/' + menu):
           print '/etc/xdg/menus/'+menu + ' Not found!'
 
@@ -30,17 +36,18 @@ class MenuCache:
        self.createFile(self.file_name)
        self.file=open(self.file_name,'a')
        self.file.write( '<?xml version="1.0" encoding="UTF-8"?>\n')
-       self.file.write( '<xdg-menu>\n')
+       self.file.write( '<' + self.tag + '>\n')
        map(self.walk_menu, gmenu.lookup_tree(menu).root.get_contents())
-       self.file.write('</xdg-menu>\n')
+       self.file.write('</'+ self.tag + '>\n')
        self.file.close()
+
     def getMenu(self):
-        print HOME_PATH + '/' + CACHE_PATH + '/' + MENU_CACHE
-	return  HOME_PATH + '/' + CACHE_PATH + '/' + MENU_CACHE
+        print self.file_name + " loaded!"
+	return  self.file_name
     def walk_menu(self, entry):
        if entry.get_type() == gmenu.TYPE_DIRECTORY:
-          self.file.write( '<menu id="%s" label="%s">\n' \
-             % (escape(entry.menu_id), escape(entry.get_name())) )
+          self.file.write( '<menu id="%s" label="%s" icon="%s">\n' \
+             % (escape(entry.menu_id), escape(entry.get_name()),escape(entry.get_icon()) ) )
           map(self.walk_menu, entry.get_contents())
           self.file.write('</menu>\n' )
        elif entry.get_type() == gmenu.TYPE_ENTRY and not entry.is_excluded:
@@ -54,7 +61,7 @@ class MenuCache:
           self.file.write( '</item>\n' )
 
     def createFile(self, file_name):
-       if not os.path.exists(HOME_PATH+'/'+CACHE_PATH):
-           os.system('mkdir %s' %HOME_PATH+'/'+CACHE_PATH)
+       if not os.path.exists(self.cache_dir_path):
+           os.system('mkdir %s' %self.cache_dir_path)
        file=open(file_name,'w')
        file.close()
