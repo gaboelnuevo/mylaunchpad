@@ -3,6 +3,7 @@ import os, sys
 import pygtk
 import logging
 import re
+import threading
 from appsmenu import MenuCache
 pygtk.require('2.0')
 
@@ -41,8 +42,13 @@ class AppStore:
         self.mainbox = mainbox
         
         # Get Menu
-	menu = MenuCache()
+	menu = MenuCache(AUTO_UPDATE=False)
         self.appsmenu = menu.getMenu()
+
+        #update cache in the background
+        t = threading.Thread(target=menu.updateCache())  
+        t.start() 
+        
 
 
         # Get Categories
@@ -357,7 +363,6 @@ class MyLauncher:
 
         #(width, height) = widget.get_size()
         cr.set_source_rgba(self.bgcolor.red, self.bgcolor.green, self.bgcolor.blue, float(self.opacity)/100)
-
 
         cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
         cr.fill()
