@@ -11,7 +11,7 @@ You can link another xdg-menu for example lxde-menu with ln command:
 #sudo ln -s /etc/xdg/menus/lxde-applications.menu /etc/xdg/menus/applications.menu
 
 *Dependences:
-python-gmenus
+python-gmenu
 pygtk
 cairo
 lxml
