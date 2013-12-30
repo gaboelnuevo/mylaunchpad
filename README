@@ -6,7 +6,7 @@ Autor: Gabriel Sabillon
 Based in oblogout code by Andrew Williams
 
 Works with xdg-menu by default work with applications.menu of gnome-menus
-You can link another xdg-menu for example lxde-menu or debian menu with ln command:
+You can link another xdg-menu for example lxde-menu with ln command:
 
 #sudo ln -s /etc/xdg/menus/lxde-applications.menu /etc/xdg/menus/applications.menu
 
