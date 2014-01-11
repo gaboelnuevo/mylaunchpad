@@ -1,27 +1,34 @@
-Full Screen launcher for openbox and other stand-alone window managers.
+Eyecandy Full Screen launcher script for openbox and other stand-alone window managers.
 
 Run with python and gtk/cairo
 
 Autor: Gabriel Sabillon
-Based in oblogout code by Andrew Williams
 
-Works with xdg-menu by default work with applications.menu of gnome-menus
-You can link another xdg-menu for example lxde-menu with ln command:
+Credits:
+  Based in oblogout interface code by Andrew Williams and Archbang script for openbox pipe menu
 
-#sudo ln -s /etc/xdg/menus/lxde-applications.menu /etc/xdg/menus/applications.menu
 
 *Dependences:
-python-gmenu
-pygtk
-cairo
-lxml
+  *python-gmenu
+  *pygtk
+  *cairo
+  *lxml
 
 *RUN:
-make the file mylaunchpad.py executable and run it
+  make the file mylaunchpad.py executable and run it
+
+  By default the app works with xdg-menu  applications.menu of gnome-menus
+  You can link another xdg-menu for example lxde-menu with ln command:
+
+    $sudo ln -s /etc/xdg/menus/lxde-applications.menu /etc/xdg/menus/applications.menu
+
+  Or You can send another xdg-menu like a argument simple run:
+  
+    $mylaunchpad.py lxde-applications
 
 
 *Add to panel:
-You can add this launcher in your panel creating a .desktop  file when you click on it the launcher run and show when you chose a app the launcher hide and exit
+  You can add this launcher in your panel creating a .desktop  file when you click on it the launcher run and show when you chose a app the launcher hide and exit
 
 [Desktop Entry]
 Type=Application
