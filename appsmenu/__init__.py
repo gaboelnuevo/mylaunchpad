@@ -1,4 +1,5 @@
 #based in archbang script
+
 #!/usr/bin/env python
 import re, sys, os
 from xml.sax.saxutils import escape
@@ -14,13 +15,13 @@ CACHE_DIR = "mylaunchpad"
 
 
 class MenuCache:
-    def __init__(self, tag='xdg-menu', AUTO_UPDATE = True):
+    def __init__(self, tag='xdg-menu', AUTO_UPDATE = True, cache_dir = CACHE_DIR,  file_name = MENU_CACHE_FILE):
        self.tag = tag
        home_path = os.path.realpath(os.path.expanduser('~'))
-       self.cache_dir_path = home_path + '/' + ".cache/" + CACHE_DIR
+       self.cache_dir_path = home_path + '/' + ".cache/" + cache_dir
 
-       self.file_name = self.cache_dir_path + '/' + MENU_CACHE_FILE
-       if not os.path.exists(self.file_name) or AUTO_UPDATE == True:
+       self.file_path = self.cache_dir_path + '/' + file_name
+       if not os.path.exists(self.file_path) or AUTO_UPDATE == True:
           self.updateCache()
 
     def updateCache(self):
@@ -34,8 +35,8 @@ class MenuCache:
           print '/etc/xdg/menus/'+menu + ' Not found!'
 
        # write menu cache
-       self.createFile(self.file_name)
-       self.file=open(self.file_name,'a')
+       self.createFile(self.file_path)
+       self.file=open(self.file_path,'a')
        self.file.write( '<?xml version="1.0" encoding="UTF-8"?>\n')
        self.file.write( '<' + self.tag + '>\n')
        map(self.walk_menu, gmenu.lookup_tree(menu).root.get_contents())
@@ -43,8 +44,8 @@ class MenuCache:
        self.file.close()
 
     def getMenu(self):
-        print self.file_name + " loaded!"
-	return  self.file_name
+        #print self.file_path
+	return  self.file_path
     def walk_menu(self, entry):
        if entry.get_type() == gmenu.TYPE_DIRECTORY:
           self.file.write( '<menu id="%s" label="%s" icon="%s">\n' \
@@ -61,8 +62,8 @@ class MenuCache:
              '<command>%s</command></action>\n' % escape(command) )
           self.file.write( '</item>\n' )
 
-    def createFile(self, file_name):
+    def createFile(self, file_path):
        if not os.path.exists(self.cache_dir_path):
            os.system('mkdir %s' %self.cache_dir_path)
-       file=open(file_name,'w')
+       file=open(file_path,'w')
        file.close()
