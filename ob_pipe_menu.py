@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #Recycle code for dynamic openbox pipe menu:
+#This is no a part of the project code is only a example for recycle it
 
 import os
 import threading
