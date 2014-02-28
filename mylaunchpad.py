@@ -161,7 +161,7 @@ class AppStore:
     def get_icon(self, icon_name):
         try:
            theme = gtk.icon_theme_get_default()
-           pixbuf = theme.load_icon(icon_name, ICON_SIZE, 0)
+           pixbuf = theme.load_icon(icon_name.split('.')[0],ICON_SIZE, 0)
            return gtk.image_new_from_pixbuf(pixbuf)
         except:
            return gtk.image_new_from_file (icon_name)
