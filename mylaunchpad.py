@@ -11,7 +11,7 @@ ICON_SIZE = 64
 ROW_PADDING = 32
 COL_PADDING = 32
 BUTTON_PADDING = 22
-CONTAINER_PADDING = 4
+CONTAINER_PADDING = 10
 OPACITY = 85
 
 try:
@@ -42,7 +42,7 @@ class AppStore:
         self.mainbox = mainbox
         
         # Get Menu
-	menu = MenuCache(AUTO_UPDATE=False)
+        menu = MenuCache(AUTO_UPDATE=False)
         self.appsmenu = menu.getMenu()
 
         #update cache in the background
@@ -55,7 +55,7 @@ class AppStore:
         
         # Create containers
         self.mainContainer = gtk.HBox(False, 0)
-	self.buttonsContainer = gtk.VBox(False)
+        self.buttonsContainer = gtk.VBox(False)
 
         # Get maxcolums and max rows
         self.maxcolums = self.calculate_maxcolums()
@@ -63,11 +63,10 @@ class AppStore:
         
         # Get system font size
         self.font_style = self.buttonsContainer.get_style().font_desc.to_string()
-        self.fontsize = int(re.search(r"(\d+)", self.font_style).group(1))
-        
+        self.fontsize = int(re.search(r"(\d+)", self.font_style).group(1))        
         # Pack in the button container box into main container box, with two padder boxes
-	self.mainContainer.pack_start(gtk.HBox(), True, True)
-	self.mainContainer.pack_start(self.buttonsContainer, False, True, 0)
+        self.mainContainer.pack_start(gtk.HBox(), True, True)
+        self.mainContainer.pack_start(self.buttonsContainer, False, True, 0)
         self.mainContainer.pack_start(gtk.HBox(), True, True)
         
         #add toolbar
@@ -78,7 +77,7 @@ class AppStore:
 
         self.load("ALL")
         self.search.connect("key-press-event", self.activate_search)
-	self.window.add(mainbox)
+        self.window.add(mainbox)
 
     #load apps
     def load(self, id_category):
@@ -109,10 +108,15 @@ class AppStore:
             print "No result"
 
     def add_toolbar(self, widget, categories, launcher):
+        toolbar_container = gtk.HBox(False)
         # create toolbar
-        toolbar = gtk.HBox()
+        toolbar = gtk.HBox(False)
         toolbar.set_border_width(5)
         
+        toolbar_container.pack_start(gtk.HBox()) #
+        
+        
+        toolbar.pack_start(gtk.HBox())
         # Add Categories as buttons
         button = gtk.Button("All")
         button.set_relief(gtk.RELIEF_NONE)
@@ -131,16 +135,24 @@ class AppStore:
            button.set_border_width(0)
            button.set_property('can-focus', False)
            button.connect("clicked", self.activate_category, category['id'])
-           toolbar.pack_start(button, False, False, 5)
+           toolbar.pack_start(button, False, False, 15)
         # Add search box
         self.search = gtk.Entry()
         self.search.set_editable(False)
         #self.search.set_property('can-focus', False)
         self.search.set_text("Start tipping...")
         self.search.connect("activate", self.enter_callback)
+        toolbar.pack_end(gtk.HBox())
         toolbar.pack_end(self.search, False, False, 5)
+        
         # Add toolbar to widget
-        widget.pack_start(toolbar, False , False, 5)
+        
+        toolbar_container.pack_start(toolbar, False , False, 0)
+        
+        toolbar_container.pack_start(gtk.HBox()) #
+        
+        
+        widget.pack_start(toolbar_container, False , False, 15)
     
     # closing the window from the WM
     def destroy(self, widget=None, event=None):
@@ -164,6 +176,9 @@ class AppStore:
            pixbuf = theme.load_icon(icon_name.split('.')[0],ICON_SIZE, 0)
            return gtk.image_new_from_pixbuf(pixbuf)
         except:
+           if not icon_name or not os.path.exists(icon_name):
+               pixbuf = theme.load_icon("exec",ICON_SIZE, 0)
+               return gtk.image_new_from_pixbuf(pixbuf)
            return gtk.image_new_from_file (icon_name)
 
     def paginate(self, lista):
@@ -191,7 +206,7 @@ class AppStore:
 	
         #row_widget = self.new_row(self.buttonsContainer)
         iconCounter=0
-	rowCounter=0
+        rowCounter=0
 
         for item in lista[(self.maxrows*self.maxcolums)*(Page-1):(self.maxrows*self.maxcolums)*(Page)]:
                if (iconCounter)%self.maxcolums == 0:
@@ -226,9 +241,9 @@ class AppStore:
         button.connect("clicked", self.click_button, item['command'])
         button.connect("focus-in-event", self.in_focus)
         button.connect("focus-out-event", self.out_focus)
-	labelString = item['label']
+        labelString = item['label']
         ## label to big
-	if len(item['label']) > 15:
+        if len(item['label']) > 15:
             if len(item['command']) < 15:
                labelString = item['command'].replace('-', ' ').capitalize()
         if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
@@ -282,8 +297,8 @@ class AppStore:
          print "%s pressed" %command
          os.system(command + ' &')
 
-## xpath tutorial:
-## http://www.w3schools.com/xpath/xpath_syntax.asp
+     ## xpath tutorial:
+     ## http://www.w3schools.com/xpath/xpath_syntax.asp
 
     def getApps(self, Category="ALL", Page=1):
        root = etree.parse(self.appsmenu)
@@ -450,3 +465,4 @@ class MyLauncher:
 
 launcher = MyLauncher()
 launcher.run_launcher()
+
