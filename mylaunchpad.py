@@ -1,5 +1,7 @@
- #!/usr/bin/env python 
- ##Note: For run in arch linux change python to pyhton2
+#!/usr/bin/env python 
+
+##Note: For run in arch linux change python to pyhton2
+
 import os, sys
 import pygtk
 import logging
