@@ -153,7 +153,7 @@ class AppStore:
         toolbar_container.pack_start(gtk.HBox()) #
         
         
-        widget.pack_start(toolbar_container, False , False, 15)
+        widget.pack_start(toolbar_container, False , False, 30)
     
     # closing the window from the WM
     def destroy(self, widget=None, event=None):
@@ -392,8 +392,11 @@ class MyLauncher:
          # Start pyGTK setup
         self.window = gtk.Window()
         self.window.set_title("MyLaunchpad")
+        
+        self.window.add_events(gtk.gdk.BUTTON_PRESS_MASK)
 
         self.window.connect("destroy", self.quit)
+        self.window.connect("button-press-event", self.quit)
         self.window.connect("key-press-event", self.on_keypress)
         self.window.connect("window-state-event", self.on_window_state_change)
 
