@@ -14,22 +14,33 @@ Credits:
   *cairo
   *lxml
 
-*RUN:
+How to RUN:
   make the file mylaunchpad.py executable and run it
 
-  By default the app works with xdg-menu  applications.menu of gnome-menus
+ 	 $./mylaunchpad.py default
+
+  or simply:
+	
+	 $./mylaunchpad.py
+
+
+  By default the app works with xdg-menu  «applications.menu» of gnome-menus
   You can link another xdg-menu for example lxde-menu with ln command:
 
     $sudo ln -s /etc/xdg/menus/lxde-applications.menu /etc/xdg/menus/applications.menu
 
-  Or You can send another xdg-menu like a argument simple run:
+  Or You can change the default menu with your favorite xdg-menu like xfce-applications or lxde-aplications
+  just send another xdg-menu like a argument simple run:
   
     $mylaunchpad.py lxde-applications
 
 
-*Add to panel:
-  You can add this launcher in your panel creating a .desktop  file when you click on it the launcher run and show when you chose a app the launcher hide and exit
 
+How to add launcher to panel(tint2):
+ You can add this launcher in your tint2 panel creating a .desktop  file 
+ 
+Desktop file example:
+ 
 [Desktop Entry]
 Type=Application
 Name=Menu
@@ -38,11 +49,7 @@ GenericName=Menu
 Icon= <<Insert your icon path here>>
 Exec= <<Insert script path here>>
 If your panel is tint2 you only need add a line in your config file:
-# Each launcher_item_app must be a full path to a .desktop file
+
 launcher_item_app = /home/<<user>>/<<path>>/menu.desktop 
 
 
-If your panel is tint2 you only need add a line in your config file:
-
-# Each launcher_item_app must be a full path to a .desktop file
-launcher_item_app = /home/<<user>>/<<path>>/menu.desktop

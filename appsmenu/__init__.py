@@ -26,7 +26,10 @@ class MenuCache:
 
     def updateCache(self):
        if len(sys.argv) > 1:
-          menu = sys.argv[1] + '.menu'
+          if sys.argv[1] == "default":
+              menu = 'applications.menu'
+          else:
+              menu = sys.argv[1] + '.menu'
        else:
           menu = 'applications.menu'
 
@@ -66,7 +69,8 @@ class MenuCache:
                  '<command>%s</command></action>\n' % escape(command) )
               self.file.write( '</item>\n' )
           except:
-              print "no se pudo cargar el item " + entry.get_name()
+			  pass
+          #    print "no se pudo cargar el item " + entry.get_name()
 
     def createFile(self, file_path):
        if not os.path.exists(self.cache_dir_path):
