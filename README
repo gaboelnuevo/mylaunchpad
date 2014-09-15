@@ -14,14 +14,20 @@ Credits:
   *cairo
   *lxml
 
+How to install:
+
+Run:
+
+python setup.py install
+
 How to RUN:
   make the file mylaunchpad.py executable and run it
 
- 	 $./mylaunchpad.py default
+ 	 $mylaunchpad default
 
   or simply:
 	
-	 $./mylaunchpad.py
+	 $mylaunchpad
 
 
   By default the app works with xdg-menu  «applications.menu» of gnome-menus
