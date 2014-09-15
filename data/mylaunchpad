@@ -5,6 +5,9 @@ import pygtk
 import logging
 import re
 import threading
+import ConfigParser
+
+
 from appsmenu import MenuCache
 pygtk.require('2.0')
 
@@ -15,10 +18,23 @@ BUTTON_PADDING = 22
 CONTAINER_PADDING = 10
 OPACITY = 85
 
+
+#default configuration
+POWER_BUTTON = True
+
+
+#default commands
+INTERNAL_MENU_SHUTDOWN_COMMAND = "sudo shutdown -h now"
+INTERNAL_MENU_REBOOT_COMMAND   = "sudo reboot"
+INTERNAL_MENU_LOCK_COMMAND = ""
+INTERNAL_MENU_LOGOUT_COMMAND = ""
+INTERNAL_MENU_SUSPEND_COMMAND = ""
+
 try:
     from lxml import etree
 except:
     print "lxml missing, please install pyhton-lxml "
+    sys.exit()
 
 try:
     import gtk
@@ -43,7 +59,7 @@ class AppStore:
         self.mainbox = mainbox
         
         # Get Menu
-        menu = MenuCache(AUTO_UPDATE=False)
+        menu = MenuCache(AUTO_UPDATE=False, xdg_menu = launcher.xdg_menu)
         self.appsmenu = menu.getMenu()
 
         #update cache in the background
@@ -116,7 +132,6 @@ class AppStore:
         
         toolbar_container.pack_start(gtk.HBox()) #
         
-        
         toolbar.pack_start(gtk.HBox())
         # Add Categories as buttons
         button = gtk.Button("All")
@@ -136,23 +151,34 @@ class AppStore:
            button.set_border_width(0)
            button.set_property('can-focus', False)
            button.connect("clicked", self.activate_category, category['id'])
-           toolbar.pack_start(button, False, False, 15)
+           toolbar.pack_start(button, False, False, 10)
+           
+        #shutdown button
+        
+        if launcher.power_button:
+           self.btnshutdown = gtk.Button()
+           self.btnshutdown.add(self.get_icon("system-shutdown-symbolic",24))
+           self.btnshutdown.set_relief(gtk.RELIEF_NONE)
+           if not launcher.custom_power_manager or launcher.custom_power_manager == 'none' :
+              self.btnshutdown.connect("clicked", self.get_shutdown_menu)
+           else:
+              self.btnshutdown.connect_object("clicked", self.run_command, launcher.custom_power_manager)
+ 
+           toolbar.pack_end(self.btnshutdown)
+
+           
         # Add search box
         self.search = gtk.Entry()
         self.search.set_editable(False)
-        #self.search.set_property('can-focus', False)
         self.search.set_text("Start tipping...")
         self.search.connect("activate", self.enter_callback)
-        toolbar.pack_end(gtk.HBox())
-        toolbar.pack_end(self.search, False, False, 5)
-        
-        # Add toolbar to widget
-        
+        toolbar.pack_end(self.search)
+
+        # Add toolbar to widget        
         toolbar_container.pack_start(toolbar, False , False, 0)
-        
-        toolbar_container.pack_start(gtk.HBox()) #
-        
-        
+        toolbar.pack_start(gtk.HBox())
+        toolbar_container.pack_start(gtk.HBox(True,True)) #
+    
         widget.pack_start(toolbar_container, False , False, 30)
     
     # closing the window from the WM
@@ -162,23 +188,23 @@ class AppStore:
         
     #Calculate max columns 
     def calculate_maxcolums(self):   
-	maxcolums = (gtk.gdk.screen_width() / (ICON_SIZE + COL_PADDING*2 + BUTTON_PADDING*2+CONTAINER_PADDING*2))
-	return maxcolums
-	
+       maxcolums = (gtk.gdk.screen_width() / (ICON_SIZE + COL_PADDING*2 + BUTTON_PADDING*2+CONTAINER_PADDING*2))
+       return maxcolums
+    
     #Calculate max row
     def calculate_maxrows(self):   
-	maxrows = (gtk.gdk.screen_height() / (ICON_SIZE*2 + ROW_PADDING*2 + BUTTON_PADDING*2))
-	return maxrows
-	
+        maxrows = (gtk.gdk.screen_height() / (ICON_SIZE*2 + ROW_PADDING*2 + BUTTON_PADDING*2))
+        return maxrows
+    
     # Get icon
-    def get_icon(self, icon_name):
+    def get_icon(self, icon_name, size = ICON_SIZE):
         try:
            theme = gtk.icon_theme_get_default()
-           pixbuf = theme.load_icon(icon_name.split('.')[0],ICON_SIZE, 0)
+           pixbuf = theme.load_icon(icon_name.split('.')[0],size, 0)
            return gtk.image_new_from_pixbuf(pixbuf)
         except:
            if not icon_name or not os.path.exists(icon_name):
-               pixbuf = theme.load_icon("exec",ICON_SIZE, 0)
+               pixbuf = theme.load_icon("exec",size, 0)
                return gtk.image_new_from_pixbuf(pixbuf)
            return gtk.image_new_from_file (icon_name)
 
@@ -204,7 +230,7 @@ class AppStore:
 
     def fill_buttonsContainer(self, lista, Page=1):
         self.paginate(lista)
-	
+    
         #row_widget = self.new_row(self.buttonsContainer)
         iconCounter=0
         rowCounter=0
@@ -223,49 +249,71 @@ class AppStore:
 
     def add_button(self, item, row):
         """ Add a button to the panel """
-        box = gtk.VBox(False)
+        if item['label'] != 'MyLaunchpad':
+			box = gtk.VBox(False)
 
-        image = gtk.Image()
-        button = gtk.Button()
-        button.set_relief(gtk.RELIEF_NONE)
-        gtk.RELIEF_NORMAL
-        button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
-        button.set_focus_on_click(False)
-        button.set_border_width(0)
-        button.set_property('can-focus', True)
-        icon_name = item['icon']
-        icon = self.get_icon(icon_name)
-        button.add(icon)
-        button.set_size_request(ICON_SIZE+BUTTON_PADDING, ICON_SIZE+BUTTON_PADDING)
-        button.show()
-        box.pack_start(button, False, False, BUTTON_PADDING)
-        button.connect("clicked", self.click_button, item['command'])
-        button.connect("focus-in-event", self.in_focus)
-        button.connect("focus-out-event", self.out_focus)
-        labelString = item['label']
-        ## label to big
-        if len(item['label']) > 15:
-            if len(item['command']) < 15:
-               labelString = item['command'].replace('-', ' ').capitalize()
-        if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
-            labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)-3]+"..."
-        label = gtk.Label(labelString)
-        label.set_tooltip_text(item['label'])
-        label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
-        #if len(labelString) > 12:
-           #label.set_line_wrap(True)
-        label.set_justify(gtk.JUSTIFY_CENTER)
-        
-        box.set_size_request(ICON_SIZE+BUTTON_PADDING*2, ICON_SIZE*2)
-        box.pack_end(label, False, True)
-	
-        row.pack_start(box, False, False, COL_PADDING)
+			image = gtk.Image()
+			button = gtk.Button()
+			button.set_relief(gtk.RELIEF_NONE)
+			#gtk.RELIEF_NORMAL
+			#button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+			#button.set_property('opacity', 0.3)
+			button.set_focus_on_click(False)
+			button.set_border_width(0)
+			button.set_property('can-focus', True)
+			icon_name = item['icon']
+			icon = self.get_icon(icon_name)
+			button.add(icon)
+			button.set_size_request(ICON_SIZE+BUTTON_PADDING, ICON_SIZE+BUTTON_PADDING)
+			button.show()
+			box.pack_start(button, False, False, BUTTON_PADDING)
+			button.connect("clicked", self.click_button, item['command'])
+			button.connect("focus-in-event", self.in_focus)
+			button.connect("focus-out-event", self.out_focus)
+			labelString = item['label']
+			## label to big
+			if len(item['label']) > 15:
+				if len(item['command']) < 15:
+				   labelString = item['command'].replace('-', ' ').capitalize()
+			if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
+				labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)-3]+"..."
+			label = gtk.Label(labelString)
+			label.set_tooltip_text(item['label'])
+			label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+			#if len(labelString) > 12:
+			   #label.set_line_wrap(True)
+			label.set_justify(gtk.JUSTIFY_CENTER)
+			
+			box.set_size_request(ICON_SIZE+BUTTON_PADDING*2, ICON_SIZE*2)
+			box.pack_end(label, False, True)
+		
+			row.pack_start(box, False, False, COL_PADDING)
 
     def click_button(self, widget, command):
         self.run_command(command)
 
     def in_focus(self, widget, event):
         widget.set_relief(gtk.RELIEF_NORMAL)
+        
+    def expose(self, widget, event):
+        cr = widget.window.cairo_create()
+        if launcher.supports_alpha == True:
+            cr.set_source_rgba(1.0, 1.0, 1.0, 0.0) # Transparent
+        else:
+            cr.set_source_rgb(1.0, 1.0, 1.0) # Opaque white
+
+        # Draw the background
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        cr.paint()
+
+        #(width, height) = widget.get_size()
+        cr.set_source_rgba(launcher.bgcolor.red, launcher.bgcolor.green, launcher.bgcolor.blue, float(launcher.opacity)/100)
+
+        #cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
+        cr.fill()
+        cr.stroke()
+        
+        return False
 
     def out_focus(self, widget, event):
         widget.set_relief(gtk.RELIEF_NONE)
@@ -298,6 +346,41 @@ class AppStore:
          print "%s pressed" %command
          os.system(command + ' &')
 
+    def get_shutdown_menu(self, widget):
+        
+        menu = gtk.Menu()
+        
+        for cmd in launcher.config.get('options', 'power_options').replace(' ', '').split(','): 
+            if cmd == "shutdown" and launcher.shutdown_cmd:
+                item = gtk.MenuItem("Shutdown")
+                menu.append(item)
+                item.connect_object("activate", self.run_command, launcher.shutdown_cmd)
+                continue
+            if cmd == "reboot" and launcher.reboot_cmd:
+                item = gtk.MenuItem("Reboot")
+                menu.append(item)
+                item.connect_object("activate", self.run_command, launcher.reboot_cmd)
+                continue
+            if cmd == "suspend" and launcher.suspend_cmd:
+                item = gtk.MenuItem("Suspend")
+                menu.append(item)
+                item.connect_object("activate", self.run_command, launcher.suspend_cmd)
+                continue
+            if cmd == "lock" and launcher.lock_cmd:
+                item = gtk.MenuItem("Lock")
+                menu.append(item)
+                item.connect_object("activate", self.run_command, launcher.lock_cmd)
+                continue
+            if cmd == "logout" and launcher.logout_cmd:
+                item = gtk.MenuItem("Logout")
+                menu.append(item)
+                item.connect_object("activate", self.run_command, launcher.logout_cmd)
+                continue
+            print "->Error! Wrong command option: " + cmd + " in the config file\n"
+            
+        menu.show_all()
+        gtk.Menu.popup(menu, None, None, None, 1, 0)
+        
      ## xpath tutorial:
      ## http://www.w3schools.com/xpath/xpath_syntax.asp
 
@@ -332,11 +415,43 @@ class MyLauncher:
     def __init__(self):
         # Start logger
         self.logger = logging.getLogger(self.__class__.__name__)
+		
+        #read config
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read('/etc/mylaunchpad.conf')
+
+        
+        self.power_button = self.read_bool_item_config('options', 'power_button', POWER_BUTTON)
+        self.custom_power_manager = self.read_item_config('options', 'custom_power_manager', 'none')
+        self.xdg_menu =  self.read_item_config('options', 'xdg-menu', 'default')
+                
+        self.shutdown_cmd = self.read_item_config('commands', 'shutdown', INTERNAL_MENU_SHUTDOWN_COMMAND)
+        self.reboot_cmd = self.read_item_config('commands', 'reboot', INTERNAL_MENU_REBOOT_COMMAND)
+        self.suspend_cmd = self.read_item_config('commands', 'suspend', INTERNAL_MENU_SUSPEND_COMMAND)
+        self.lock_cmd = self.read_item_config('commands', 'lock', INTERNAL_MENU_LOCK_COMMAND)
+        self.logout_cmd = self.read_item_config('commands', 'logout', INTERNAL_MENU_LOGOUT_COMMAND)
+        
+        
+        
+       
         # bgcolor and opacity
         self.opacity = OPACITY
         self.bgcolor = gtk.gdk.color_parse("black")
         self.init_window()
-
+        
+    def read_item_config (self, section, option, default = ""):
+        if self.config.has_section(section):
+            if self.config.has_option(section, option):
+                return self.config.get(section, option)
+        return default
+        
+    def read_bool_item_config (self, section, option, default = False):
+        if self.config.has_section(section):
+            if self.config.has_option(section, option):
+                return self.config.getboolean(section, option)
+        return default
+    
+    
     def quit(self, widget=None, data=None):
         gtk.main_quit()
 
@@ -379,21 +494,23 @@ class MyLauncher:
         # Draw the background
         cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.paint()
-
-        #(width, height) = widget.get_size()
+        
+        #(width, height) = widget.get_size()    
         cr.set_source_rgba(self.bgcolor.red, self.bgcolor.green, self.bgcolor.blue, float(self.opacity)/100)
-
         cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
         cr.fill()
+
+        
         cr.stroke()
         return False
-
+    
     def init_window(self):
          # Start pyGTK setup
         self.window = gtk.Window()
         self.window.set_title("MyLaunchpad")
         
         self.window.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+        
 
         self.window.connect("destroy", self.quit)
         self.window.connect("button-press-event", self.quit)
@@ -419,9 +536,9 @@ class MyLauncher:
         self.window.set_decorated(False)
         self.window.set_position(gtk.WIN_POS_CENTER)
 
-	mainbox = gtk.VBox(False, 0);
-	
-	apps = AppStore(mainbox, self)
+        mainbox = gtk.VBox(False, 0);
+    
+        apps = AppStore(mainbox, self)
 
         if self.rendered_effects == True:
             self.logger.debug("Stepping though render path")

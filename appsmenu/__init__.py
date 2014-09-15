@@ -1,5 +1,4 @@
 #based in archbang script
-
 #!/usr/bin/env python
 import re, sys, os
 from xml.sax.saxutils import escape
@@ -15,10 +14,12 @@ CACHE_DIR = "mylaunchpad"
 
 
 class MenuCache:
-    def __init__(self, tag='xdg-menu', AUTO_UPDATE = True, cache_dir = CACHE_DIR,  file_name = MENU_CACHE_FILE):
+    def __init__(self, tag='xdg-menu', AUTO_UPDATE = True, cache_dir = CACHE_DIR,  file_name = MENU_CACHE_FILE, xdg_menu='default'):
        self.tag = tag
        home_path = os.path.realpath(os.path.expanduser('~'))
        self.cache_dir_path = home_path + '/' + ".cache/" + cache_dir
+       
+       self.xdg_menu = xdg_menu
 
        self.file_path = self.cache_dir_path + '/' + file_name
        if not os.path.exists(self.file_path) or AUTO_UPDATE == True:
@@ -31,8 +32,10 @@ class MenuCache:
           else:
               menu = sys.argv[1] + '.menu'
        else:
-          menu = 'applications.menu'
-
+          if self.xdg_menu == 'default':
+              menu = 'applications.menu'
+          else:
+              menu = self.xdg_menu  + '.menu'
        ## xdg-menu
        if not os.path.exists('/etc/xdg/menus/' + menu):
           print '/etc/xdg/menus/'+menu + ' Not found!'

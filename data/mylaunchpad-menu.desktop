@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=MyLaunchpad
+Comment=Eyecandy Full Screen launcher for openbox and other stand-alone window managers
+X-GNOME-FullName=Openbox Menu
+Exec=mylaunchpad
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=mylaunchpad-menu.png
+Categories=Menu;
+MimeType=
+StartupNotify=true
+GenericName=
