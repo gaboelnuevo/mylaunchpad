@@ -5,18 +5,38 @@ import pygtk
 import logging
 import re
 import threading
+import signal
 import ConfigParser
-
-
 from appsmenu import MenuCache
+from subprocess import call
 pygtk.require('2.0')
+
+# checking for already running process
+
+if os.path.isfile('.mylaunchpad_lock'):
+    mylaunchpad_lock_file = open(".mylaunchpad_lock", "r")
+    pid = int(mylaunchpad_lock_file.readline())
+    do_exit = True
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except:
+        # some error
+        do_exit = False
+    os.remove('.mylaunchpad_lock')
+    mylaunchpad_lock_file.close()
+    if do_exit:
+        exit()
+
+mylaunchpad_lock_file = open(".mylaunchpad_lock", "w")
+mylaunchpad_lock_file.write(str(os.getpid()) + "\n")
+mylaunchpad_lock_file.close()
 
 ICON_SIZE = 64
 ROW_PADDING = 32
 COL_PADDING = 32
 BUTTON_PADDING = 22
 CONTAINER_PADDING = 10
-OPACITY = 85
+OPACITY = 75
 
 
 #default configuration
@@ -56,7 +76,11 @@ except:
 class AppStore:
     def __init__(self, mainbox, launcher):
         self.window = launcher.window
+        self.window.set_skip_taskbar_hint(True)
+        self.window.stick()
         self.mainbox = mainbox
+        self.cur_page = 1
+        self.cur_category = "ALL"
         
         # Get Menu
         menu = MenuCache(AUTO_UPDATE=False, xdg_menu = launcher.xdg_menu)
@@ -93,8 +117,9 @@ class AppStore:
         mainbox.pack_start(self.mainContainer)
 
         self.load("ALL")
-        self.search.connect("key-press-event", self.activate_search)
+        self.search.connect("key-release-event", self.activate_search)
         self.window.add(mainbox)
+        self.window.maximize() # HOT FIX
 
     #load apps
     def load(self, id_category):
@@ -151,7 +176,7 @@ class AppStore:
            button.set_border_width(0)
            button.set_property('can-focus', False)
            button.connect("clicked", self.activate_category, category['id'])
-           toolbar.pack_start(button, False, False, 10)
+           toolbar.pack_start(button, False, False, 5)
            
         #shutdown button
         
@@ -170,15 +195,18 @@ class AppStore:
         # Add search box
         self.search = gtk.Entry()
         self.search.set_editable(False)
-        self.search.set_text("Start tipping...")
+        #self.search.set_property('can-focus', False)
+        self.search.set_text("Start typing...")
         self.search.connect("activate", self.enter_callback)
-        toolbar.pack_end(self.search)
-
-        # Add toolbar to widget        
+        toolbar.pack_end(gtk.HBox())
+        toolbar.pack_end(self.search, False, False, 5)
+        
+        # Add toolbar to widget
+        
         toolbar_container.pack_start(toolbar, False , False, 0)
         toolbar.pack_start(gtk.HBox())
+
         toolbar_container.pack_start(gtk.HBox(True,True)) #
-    
         widget.pack_start(toolbar_container, False , False, 30)
     
     # closing the window from the WM
@@ -213,16 +241,19 @@ class AppStore:
         #print "pages: " + str(nPages)
         paginationbox = gtk.HBox()
         footer = gtk.HBox()
-        for i in range(1,nPages+1):
-                  button = gtk.Button(str(i))
-                  button.set_relief(gtk.RELIEF_NORMAL)
-                  button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
-                  button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
-                  button.set_focus_on_click(False)
-                  button.set_border_width(0)
-                  button.set_property('can-focus', True)
-                  button.connect("clicked", self.navigate_page, lista, i)
-                  paginationbox.pack_start(button, False , False, 5)
+        if nPages > 1:
+            for i in range(1,nPages+2):
+                button = gtk.Button(str(i))
+                button.set_relief(gtk.RELIEF_NORMAL)
+                button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
+                button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+                button.set_focus_on_click(False)
+                button.set_border_width(0)
+                button.set_property('can-focus', True)
+                button.connect("clicked", self.navigate_page, lista, i)
+                paginationbox.pack_start(button, False , False, 5)
+                button.set_label(str(i))
+            paginationbox.pack_start(gtk.Label("            Page: " + str(self.cur_page)), False, False, 5)
         footer.pack_start(gtk.HBox())
         footer.pack_start(paginationbox, False , False, 5)
         footer.pack_start(gtk.HBox())
@@ -295,33 +326,17 @@ class AppStore:
     def in_focus(self, widget, event):
         widget.set_relief(gtk.RELIEF_NORMAL)
         
-    def expose(self, widget, event):
-        cr = widget.window.cairo_create()
-        if launcher.supports_alpha == True:
-            cr.set_source_rgba(1.0, 1.0, 1.0, 0.0) # Transparent
-        else:
-            cr.set_source_rgb(1.0, 1.0, 1.0) # Opaque white
-
-        # Draw the background
-        cr.set_operator(cairo.OPERATOR_SOURCE)
-        cr.paint()
-
-        #(width, height) = widget.get_size()
-        cr.set_source_rgba(launcher.bgcolor.red, launcher.bgcolor.green, launcher.bgcolor.blue, float(launcher.opacity)/100)
-
-        #cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
-        cr.fill()
-        cr.stroke()
-        
-        return False
 
     def out_focus(self, widget, event):
         widget.set_relief(gtk.RELIEF_NONE)
 
     def activate_category(self, widget, category_id):
+        self.cur_page = 1
+        self.cur_category = category_id
         self.load(category_id)
 
     def navigate_page(self, widget, apps, page):
+        self.cur_page = page
         self.buttonContainer_size_w = self.buttonsContainer.get_allocation().width
         self.buttonContainer_size_h = self.buttonsContainer.get_allocation().height
         if self.buttonsContainer.get_children():
@@ -432,7 +447,6 @@ class MyLauncher:
         self.logout_cmd = self.read_item_config('commands', 'logout', INTERNAL_MENU_LOGOUT_COMMAND)
         
         
-        
        
         # bgcolor and opacity
         self.opacity = OPACITY
@@ -453,6 +467,7 @@ class MyLauncher:
     
     
     def quit(self, widget=None, data=None):
+        os.remove('.mylaunchpad_lock')
         gtk.main_quit()
 
     def on_keypress(self, widget=None, event=None, data=None):
@@ -494,8 +509,8 @@ class MyLauncher:
         # Draw the background
         cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.paint()
-        
-        #(width, height) = widget.get_size()    
+
+        #(width, height) = widget.get_size()
         cr.set_source_rgba(self.bgcolor.red, self.bgcolor.green, self.bgcolor.blue, float(self.opacity)/100)
         cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
         cr.fill()
@@ -503,12 +518,12 @@ class MyLauncher:
         
         cr.stroke()
         return False
-    
+
     def init_window(self):
          # Start pyGTK setup
         self.window = gtk.Window()
         self.window.set_title("MyLaunchpad")
-        
+        self.window.set_keep_above(True)
         self.window.add_events(gtk.gdk.BUTTON_PRESS_MASK)
         
 
