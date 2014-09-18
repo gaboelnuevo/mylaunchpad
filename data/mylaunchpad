@@ -285,44 +285,44 @@ class AppStore:
     def add_button(self, item, row):
         """ Add a button to the panel """
         if item['label'] != 'MyLaunchpad':
-			box = gtk.VBox(False)
+            box = gtk.VBox(False)
 
-			image = gtk.Image()
-			button = gtk.Button()
-			button.set_relief(gtk.RELIEF_NONE)
-			#gtk.RELIEF_NORMAL
-			#button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
-			#button.set_property('opacity', 0.3)
-			button.set_focus_on_click(False)
-			button.set_border_width(0)
-			button.set_property('can-focus', True)
-			icon_name = item['icon']
-			icon = self.get_icon(icon_name)
-			button.add(icon)
-			button.set_size_request(ICON_SIZE+BUTTON_PADDING, ICON_SIZE+BUTTON_PADDING)
-			button.show()
-			box.pack_start(button, False, False, BUTTON_PADDING)
-			button.connect("clicked", self.click_button, item['command'])
-			button.connect("focus-in-event", self.in_focus)
-			button.connect("focus-out-event", self.out_focus)
-			labelString = item['label']
-			## label to big
-			if len(item['label']) > 15:
-				if len(item['command']) < 15:
-				   labelString = item['command'].replace('-', ' ').capitalize()
-			if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
-				labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)-3]+"..."
-			label = gtk.Label(labelString)
-			label.set_tooltip_text(item['label'])
-			label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
-			#if len(labelString) > 12:
-			   #label.set_line_wrap(True)
-			label.set_justify(gtk.JUSTIFY_CENTER)
-			
-			box.set_size_request(ICON_SIZE+BUTTON_PADDING*2, ICON_SIZE*2)
-			box.pack_end(label, False, True)
-		
-			row.pack_start(box, False, False, COL_PADDING)
+            image = gtk.Image()
+            button = gtk.Button()
+            button.set_relief(gtk.RELIEF_NONE)
+            #gtk.RELIEF_NORMAL
+            #button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+            #button.set_property('opacity', 0.3)
+            button.set_focus_on_click(False)
+            button.set_border_width(0)
+            button.set_property('can-focus', True)
+            icon_name = item['icon']
+            icon = self.get_icon(icon_name)
+            button.add(icon)
+            button.set_size_request(ICON_SIZE+BUTTON_PADDING, ICON_SIZE+BUTTON_PADDING)
+            button.show()
+            box.pack_start(button, False, False, BUTTON_PADDING)
+            button.connect("clicked", self.click_button, item['command'])
+            button.connect("focus-in-event", self.in_focus)
+            button.connect("focus-out-event", self.out_focus)
+            labelString = item['label']
+            ## label to big
+            if len(item['label']) > 15:
+                if len(item['command']) < 15:
+                   labelString = item['command'].replace('-', ' ').capitalize()
+            if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
+                labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)-3]+"..."
+            label = gtk.Label(labelString)
+            label.set_tooltip_text(item['label'])
+            label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+            #if len(labelString) > 12:
+               #label.set_line_wrap(True)
+            label.set_justify(gtk.JUSTIFY_CENTER)
+            
+            box.set_size_request(ICON_SIZE+BUTTON_PADDING*2, ICON_SIZE*2)
+            box.pack_end(label, False, True)
+        
+            row.pack_start(box, False, False, COL_PADDING)
 
     def click_button(self, widget, command):
         self.run_command(command)
@@ -383,7 +383,7 @@ class AppStore:
             if cmd == "suspend" and launcher.suspend_cmd:
                 item = gtk.MenuItem("Suspend")
                 menu.append(item)
-                item.connect_object("activate", self.run_command, launcher.suspend_cmd)
+                item.connect_object("activate", self.run_command, launcher.lock_cmd + ' & ' + launcher.suspend_cmd)
                 continue
             if cmd == "lock" and launcher.lock_cmd:
                 item = gtk.MenuItem("Lock")
@@ -400,6 +400,12 @@ class AppStore:
         menu.show_all()
         gtk.Menu.popup(menu, None, None, None, 1, 0)
         
+
+     
+    def isHiddenItem(self, label): #not implemented yet
+        return False
+        
+        
      ## xpath tutorial:
      ## http://www.w3schools.com/xpath/xpath_syntax.asp
 
@@ -407,11 +413,13 @@ class AppStore:
        root = etree.parse(self.appsmenu)
        apps = []
        if Category == "ALL": 
-          for item in root.xpath("/xdg-menu/menu[@id]/item"):
-             apps.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
+          for item in root.xpath("/xdg-menu/menu[@id]/item[@label!='MyLaunchpad']"):
+             if not self.isHiddenItem(item.attrib["label"]):
+                 apps.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
        else:
-          for item in root.xpath("/xdg-menu/menu[@id='"+Category+"']/item"):
-             apps.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
+          for item in root.xpath("/xdg-menu/menu[@id='"+Category+"']/item[@label!='MyLaunchpad']"):
+              if not self.isHiddenItem(item.attrib["label"]):
+                 apps.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
        return apps
 
     def getCategories(self):
@@ -434,7 +442,7 @@ class MyLauncher:
     def __init__(self):
         # Start logger
         self.logger = logging.getLogger(self.__class__.__name__)
-		
+        
         #read config
         self.config = ConfigParser.RawConfigParser()
         self.config.read('/etc/mylaunchpad.conf')
@@ -536,7 +544,7 @@ class MyLauncher:
         self.window.connect("key-press-event", self.on_keypress)
         self.window.connect("window-state-event", self.on_window_state_change)
 
-		
+        
         if not self.window.is_composited():
             self.logger.debug("No compositing, enabling rendered effects")
             # Window isn't composited, enable rendered effects
