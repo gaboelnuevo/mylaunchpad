@@ -74,15 +74,7 @@ try:
 except:
     print "PIL missing, install python-imaging"
     sys.exit()
-
-def export_favor():
-    favors = open(home_dir+"/.mylaunchpadFavor", "w")
-    favors.write(str(favorite) + "\n")
-    favors.close()
-    print "Favorites exported"
-
-favorite = set()
-
+    
 def import_favor():
     global favorite
     if os.path.isfile(home_dir+"/.mylaunchpadFavor"):
@@ -94,7 +86,35 @@ def import_favor():
         export_favor()
         print "Favorites imported as empty"
 
+def export_favor():
+    favors = open(home_dir+"/.mylaunchpadFavor", "w")
+    favors.write(str(favorite) + "\n")
+    favors.close()
+    print "Favorites exported"
+    
+def import_hidden():
+    global hidden
+    if os.path.isfile(home_dir+"/.mylaunchpadHidden"):
+        hiddens = open(home_dir+"/.mylaunchpadHidden", "r")
+        hidden = eval(hiddens.readline())
+        print "Hidden imported: ", hidden
+    else:
+        hidden = set()
+        export_hidden()
+        print "Hidden imported as empty"
+
+def export_hidden():
+    hiddens = open(home_dir+"/.mylaunchpadHidden", "w")
+    hiddens.write(str(hidden) + "\n")
+    hiddens.close()
+    print "Hidden exported"
+
+favorite = set()
+hidden = set()
+
+import_hidden()
 import_favor()
+
 
 class AppStore:
     def __init__(self, mainbox, launcher):
@@ -374,11 +394,7 @@ class AppStore:
         if event.button == 1:
             self.run_command(item['command'])
         if event.button == 3:
-            if item['label'] in favorite:
-                favorite.discard(item['label'])
-                self.activate_category(None, "FAVOR")
-            else:
-                favorite.add(item['label'])
+            self.get_right_click_menu(widget, item)
 
     def in_focus(self, widget, event):
         widget.set_relief(gtk.RELIEF_NORMAL)
@@ -418,6 +434,36 @@ class AppStore:
          self.destroy()
          print "%s pressed" %command
          os.system(command + ' &')
+         
+    def hide_app(self, item):
+        hidden.add(item['label'])
+    
+    def fav_unfav(self, item):
+        if item['label'] in favorite:
+            favorite.discard(item['label'])
+            #self.activate_category(None, "FAVOR")
+        else:
+            favorite.add(item['label'])
+    
+    def get_right_click_menu(self, widget, item):       
+        menu = gtk.Menu()
+        
+        # fav/unfav
+        if item['label'] in favorite:
+            mItemFav = gtk.MenuItem("unfavorite")
+        else:
+            mItemFav = gtk.MenuItem("favorite")
+            
+        menu.append(mItemFav)
+        mItemFav.connect_object("activate", self.fav_unfav, item)
+        
+        # hide apps
+        mItemHide = gtk.MenuItem("hide")
+        menu.append(mItemHide)
+        mItemHide.connect_object("activate", self.hide_app, item)
+
+        menu.show_all()
+        gtk.Menu.popup(menu, None, None, None, 1, 0)
 
     def get_shutdown_menu(self, widget):
         
@@ -457,6 +503,8 @@ class AppStore:
 
      
     def isHiddenItem(self, label): #not implemented yet
+        if label in hidden:
+            return True
         return False
         
         
@@ -539,6 +587,7 @@ class MyLauncher:
     
     def quit(self, widget=None, data=None):
         export_favor()
+        export_hidden()
         os.remove(home_dir+'/.mylaunchpad_lock')
         gtk.main_quit()
 
