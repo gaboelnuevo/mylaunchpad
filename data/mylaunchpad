@@ -437,11 +437,12 @@ class AppStore:
          
     def hide_app(self, item):
         hidden.add(item['label'])
+        self.activate_category(None, self.cur_category)
     
     def fav_unfav(self, item):
         if item['label'] in favorite:
             favorite.discard(item['label'])
-            #self.activate_category(None, "FAVOR")
+            self.activate_category(None, self.cur_category)
         else:
             favorite.add(item['label'])
     
