@@ -15,11 +15,11 @@ Credits:
 
 
 *Dependences:
-  *python-gmenu
-  *pygtk
-  *pyhton-lxml
-  *python-cairo
-  *python-imaging
+  python-gmenu
+  pygtk
+  pyhton-lxml
+  python-cairo
+  python-imaging
 
 How to install:
 
