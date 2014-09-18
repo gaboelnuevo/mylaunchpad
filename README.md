@@ -61,6 +61,7 @@ How to RUN:
 
 How to add launcher to panel(tint2):
 	If your panel is tint2 you only need add a line in your config file:
+	
 		launcher_item_app = /usr/share/applications/mylaunchpad-menu.desktop
 
 	For light color panel you can edit the desktop file and change the icon to dark changing this line: 
