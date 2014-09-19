@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python2 
 ##Note: For run in arch linux change python to pyhton2
 import os, sys
 import pygtk
@@ -76,7 +76,7 @@ except:
 class AppStore:
     def __init__(self, mainbox, launcher):
         self.window = launcher.window
-        self.window.set_skip_taskbar_hint(True)
+        #self.window.set_skip_taskbar_hint(True)
         self.window.stick()
         self.mainbox = mainbox
         self.cur_page = 1
@@ -117,7 +117,7 @@ class AppStore:
         mainbox.pack_start(self.mainContainer)
 
         self.load("ALL")
-        self.search.connect("key-release-event", self.activate_search)
+        self.search.connect("key-press-event", self.activate_search)
         self.window.add(mainbox)
         self.window.maximize() # HOT FIX
 
@@ -198,6 +198,7 @@ class AppStore:
         #self.search.set_property('can-focus', False)
         self.search.set_text("Start typing...")
         self.search.connect("activate", self.enter_callback)
+        
         toolbar.pack_end(gtk.HBox())
         toolbar.pack_end(self.search, False, False, 5)
         
@@ -253,7 +254,7 @@ class AppStore:
                 button.connect("clicked", self.navigate_page, lista, i)
                 paginationbox.pack_start(button, False , False, 5)
                 button.set_label(str(i))
-            paginationbox.pack_start(gtk.Label("            Page: " + str(self.cur_page)), False, False, 5)
+            #paginationbox.pack_start(gtk.Label("            Page: " + str(self.cur_page)), False, False, 5)
         footer.pack_start(gtk.HBox())
         footer.pack_start(paginationbox, False , False, 5)
         footer.pack_start(gtk.HBox())
@@ -480,7 +481,8 @@ class MyLauncher:
         if event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN:
             self.window_in_fullscreen = True
         else:
-            self.window_in_fullscreen = False
+            self.window_in_fullscreen = False   
+            
     def on_screen_changed(self, widget, old_screen=None):
 
         # To check if the display supports alpha channels, get the colormap
@@ -521,9 +523,8 @@ class MyLauncher:
 
     def init_window(self):
          # Start pyGTK setup
-        self.window = gtk.Window()
+        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("MyLaunchpad")
-        self.window.set_keep_above(True)
         self.window.add_events(gtk.gdk.BUTTON_PRESS_MASK)
         
 
@@ -532,6 +533,7 @@ class MyLauncher:
         self.window.connect("key-press-event", self.on_keypress)
         self.window.connect("window-state-event", self.on_window_state_change)
 
+		
         if not self.window.is_composited():
             self.logger.debug("No compositing, enabling rendered effects")
             # Window isn't composited, enable rendered effects
@@ -593,10 +595,12 @@ class MyLauncher:
         if pixmap:
             self.window.window.set_back_pixmap(pixmap, False)
         self.window.move(0,0)
+        
 
     def run_launcher(self):
         #gtk.rc_parse('rc')
         self.window.show_all()
+        
         gtk.main()
 
 launcher = MyLauncher()
