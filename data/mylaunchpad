@@ -119,7 +119,7 @@ import_favor()
 class AppStore:
     def __init__(self, mainbox, launcher):
         self.window = launcher.window
-        #self.window.set_skip_taskbar_hint(True)
+        self.window.set_skip_taskbar_hint(True)
         self.window.stick()
         self.window.connect("key-press-event", self.on_keypress)
         self.mainbox = mainbox
