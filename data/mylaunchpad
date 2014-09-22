@@ -315,7 +315,7 @@ class AppStore:
         self.max_pages = nPages
         if nPages > 1:
             for i in range(1,nPages+1):
-                button = gtk.Button(str(i))
+                button = gtk.Button()
                 button.set_relief(gtk.RELIEF_NORMAL)
                 if self.cur_page == i:
                     button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
@@ -326,13 +326,17 @@ class AppStore:
                 button.set_border_width(0)
                 button.set_property('can-focus', True)
                 button.connect("button-press-event", self.navigate_page, lista, i)
-                paginationbox.pack_start(button, False , False, 5)
-                button.set_label(str(i))
+                label = gtk.Label()
+                label.set_use_markup(True)
+                label.set_markup('<span color="#808080"><b>'+"   "+str(i)+"   "+'</b></span>')
+                button.add(label)
+                label.show()
+                paginationbox.pack_start(button, False , False, 0)
             #paginationbox.pack_start(gtk.Label("            Page: " + str(self.cur_page)), False, False, 5)
         footer.pack_start(gtk.HBox())
-        footer.pack_start(paginationbox, False , False, 5)
+        footer.pack_start(paginationbox, False , False, 0)
         footer.pack_start(gtk.HBox())
-        self.buttonsContainer.pack_end(footer, False , False, 5)
+        self.buttonsContainer.pack_end(footer, False , False, 0)
 
     def fill_buttonsContainer(self, lista, Page=1):
         self.paginate(lista)
