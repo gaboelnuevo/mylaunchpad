@@ -23,10 +23,6 @@ Credits:
 
 How to install:
 
-Arch Linux: Install <a href="https://aur.archlinux.org/packages/mylaunchpad/">mylaunchpad</a> from AUR
-
-Other distributions:
-
 	#python setup.py install
 
 How to RUN:

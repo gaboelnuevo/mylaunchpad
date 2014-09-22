@@ -167,10 +167,12 @@ class AppStore:
 
     def on_keypress(self, widget, event):
         if gtk.gdk.keyval_name(event.keyval) == "Right":
+            self.window.set_focus(None)
             if self.cur_page < self.max_pages:
                 self.cur_page += 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
         if gtk.gdk.keyval_name(event.keyval) == "Left":
+            self.window.set_focus(None)
             if self.cur_page > 1:
                 self.cur_page -= 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
