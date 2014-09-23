@@ -161,7 +161,7 @@ class AppStore:
         mainbox.pack_start(self.mainContainer)
 
         self.load("ALL")
-        self.search.connect("key-press-event", self.activate_search)
+        self.search.connect("key-release-event", self.activate_search)
         self.window.add(mainbox)
         self.window.maximize() # HOT FIX
 
@@ -207,37 +207,42 @@ class AppStore:
             self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].set_relief(gtk.RELIEF_NORMAL)
           except:
             print "No result"
+       self.navigate_page(None, None, self.apps, 1)
 
     def add_toolbar(self, widget, categories, launcher):
         toolbar_container = gtk.HBox(False)
 
         # create toolbar
         toolbar = gtk.HBox(False)
+        self.toolbar = toolbar
         toolbar.set_border_width(5)
         
         toolbar_container.pack_start(gtk.HBox()) #
         
         toolbar.pack_start(gtk.HBox())
         # Add Categories as buttons
-        button = gtk.Button("All")
-        button.set_relief(gtk.RELIEF_NONE)
+        button = gtk.Button(" All ")
+        button.category_id = "ALL"
+        button.set_relief(gtk.RELIEF_NORMAL)
         button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
         button.set_focus_on_click(False)
         button.set_border_width(0)
         button.set_property('can-focus', False)
         button.connect("clicked", self.activate_category, "ALL")
-        toolbar.pack_start(button, False, False, 5)
+        toolbar.pack_start(button, False, False, 0)
         
-        button = gtk.Button("Favorite")
+        button = gtk.Button(" Favorite ")
+        button.category_id = "FAVOR"
         button.set_relief(gtk.RELIEF_NONE)
         button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
         button.set_focus_on_click(False)
         button.set_border_width(0)
         button.set_property('can-focus', False)
         button.connect("clicked", self.activate_category, "FAVOR")
-        toolbar.pack_start(button, False, False, 5)
+        toolbar.pack_start(button, False, False, 0)
         for category in categories:
-           button = gtk.Button(category['label'])
+           button = gtk.Button(' '+category['label']+' ')
+           button.category_id = category['id']
            button.set_relief(gtk.RELIEF_NONE)
            button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
      
@@ -245,7 +250,7 @@ class AppStore:
            button.set_border_width(0)
            button.set_property('can-focus', False)
            button.connect("clicked", self.activate_category, category['id'])
-           toolbar.pack_start(button, False, False, 5)
+           toolbar.pack_start(button, False, False, 0)
            
         #shutdown button
         
@@ -415,6 +420,16 @@ class AppStore:
     def activate_category(self, widget, category_id):
         self.cur_page = 1
         self.cur_category = category_id
+        children = self.toolbar.get_children()
+        for x in children:
+            try:
+                x.category_id
+            except:
+                continue
+            if x.category_id == category_id:
+                x.set_relief(gtk.RELIEF_NORMAL)
+            else:
+                x.set_relief(gtk.RELIEF_NONE)
         self.load(category_id)
 
     def navigate_page(self, widget, event, apps, page):
