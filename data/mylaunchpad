@@ -43,7 +43,7 @@ OPACITY = 75
 
 #default configuration
 POWER_BUTTON = True
-
+GOOGLE_SEARCH = True
 
 #default commands
 INTERNAL_MENU_SHUTDOWN_COMMAND = "sudo shutdown -h now"
@@ -171,11 +171,13 @@ class AppStore:
             if self.cur_page < self.max_pages:
                 self.cur_page += 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
-        if gtk.gdk.keyval_name(event.keyval) == "Left":
+        elif gtk.gdk.keyval_name(event.keyval) == "Left":
             self.window.set_focus(None)
             if self.cur_page > 1:
                 self.cur_page -= 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
+        elif self.search.get_text() == "":
+            self.window.set_focus(self.search)
         return
 
     #load apps
@@ -349,8 +351,16 @@ class AppStore:
         #row_widget = self.new_row(self.buttonsContainer)
         iconCounter=0
         rowCounter=0
-
-        for item in lista[(self.maxrows*self.maxcolums)*(Page-1):(self.maxrows*self.maxcolums)*(Page)]:
+        i = {
+                'icon': 'find-location-symbolic',
+                'command': "python -c 'import webbrowser; webbrowser.open(\"http://www.google.com/?q=#q="+self.search.get_text()+"\")'",
+                'label': 'Find '+self.search.get_text()
+            }
+        if (self.search.get_text() not in ["", "Start typing..."]) and GOOGLE_SEARCH:
+            addition = [i]
+        else:
+            addition = []
+        for item in lista[(self.maxrows*self.maxcolums)*(Page-1):(self.maxrows*self.maxcolums)*(Page)]+addition:
                if (iconCounter)%self.maxcolums == 0:
                   rowCounter+=1
                   row_widget = self.new_row(self.buttonsContainer)
@@ -391,7 +401,7 @@ class AppStore:
                 if len(item['command']) < 15:
                    labelString = item['command'].replace('-', ' ').capitalize()
             if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
-                labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)-3]+"..."
+                labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)]+"..."
             label = gtk.Label(labelString)
             label.set_tooltip_text(item['label'])
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
@@ -572,6 +582,7 @@ class AppStore:
 
 class MyLauncher:
     def __init__(self):
+        global GOOGLE_SEARCH
         # Start logger
         self.logger = logging.getLogger(self.__class__.__name__)
         
@@ -581,6 +592,7 @@ class MyLauncher:
 
         
         self.power_button = self.read_bool_item_config('options', 'power_button', POWER_BUTTON)
+        GOOGLE_SEARCH = self.read_bool_item_config('options', 'google_search', GOOGLE_SEARCH)
         self.custom_power_manager = self.read_item_config('options', 'custom_power_manager', 'none')
         self.xdg_menu =  self.read_item_config('options', 'xdg-menu', 'default')
                 
