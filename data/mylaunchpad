@@ -403,11 +403,11 @@ class AppStore:
             if len(item['label']) > 15:
                 if len(item['command']) < 15:
                    labelString = item['command'].replace('-', ' ').capitalize()
-            button.set_tooltip_text(labelString)
             if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
                 labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)]+"..."
             label = gtk.Label(labelString)
             label.set_tooltip_text(item['label'])
+            button.set_tooltip_text(item['label'])
             label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
             #if len(labelString) > 12:
                #label.set_line_wrap(True)
