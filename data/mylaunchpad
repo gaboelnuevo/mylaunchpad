@@ -122,6 +122,7 @@ class AppStore:
         self.window.set_skip_taskbar_hint(True)
         self.window.stick()
         self.window.connect("key-press-event", self.on_keypress)
+        self.window.connect("notify::is-active", self.focus_window)
         self.mainbox = mainbox
         self.cur_page = 1
         self.cur_category = "ALL"
@@ -176,10 +177,12 @@ class AppStore:
             if self.cur_page > 1:
                 self.cur_page -= 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
-        elif self.search.get_text() == "":
+        elif self.search.get_text() in ["", "Start typing..."]:
             self.window.set_focus(self.search)
         return
 
+    def focus_window(self, widget, event):
+        self.window.present()
     #load apps
     def load(self, id_category):
         self.buttonContainer_size_w = self.buttonsContainer.get_allocation().width
@@ -400,6 +403,7 @@ class AppStore:
             if len(item['label']) > 15:
                 if len(item['command']) < 15:
                    labelString = item['command'].replace('-', ' ').capitalize()
+            button.set_tooltip_text(labelString)
             if len(labelString) * self.fontsize > ICON_SIZE+BUTTON_PADDING*2:
                 labelString = item['label'][0:((ICON_SIZE+BUTTON_PADDING*2) / self.fontsize)]+"..."
             label = gtk.Label(labelString)
