@@ -127,6 +127,8 @@ class AppStore:
         self.cur_page = 1
         self.cur_category = "ALL"
         
+        self.window.set_modal(True)
+        
         # Get Menu
         menu = MenuCache(AUTO_UPDATE=False, xdg_menu = launcher.xdg_menu)
         self.appsmenu = menu.getMenu()
