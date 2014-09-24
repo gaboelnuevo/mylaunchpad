@@ -164,7 +164,7 @@ class AppStore:
         mainbox.pack_start(self.mainContainer)
 
         self.load("ALL")
-        self.search.connect("key-release-event", self.activate_search)
+        self.search.connect("key-press-event", self.activate_search)
         self.window.add(mainbox)
         self.window.maximize() # HOT FIX
 
