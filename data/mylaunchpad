@@ -164,7 +164,8 @@ class AppStore:
         mainbox.pack_start(self.mainContainer)
 
         self.load("ALL")
-        self.search.connect("key-press-event", self.activate_search)
+        self.search.connect("key-release-event", self.activate_search)
+        self.search.connect("key-press-event", self.enable_search)
         self.window.add(mainbox)
         self.window.maximize() # HOT FIX
 
@@ -199,13 +200,15 @@ class AppStore:
 
     def enter_callback(self, widget):
         self.run_command(self.getResults(self.search.get_text())[0]['command'])
-
-    def activate_search(self, widget=None, event=None, data=None):
-       if gtk.gdk.keyval_name(event.keyval) in ["Right", "Left"]:
-           return 
+        
+    def enable_search(self, widget=None, event=None, data=None):
        if not self.search.get_editable():
           self.search.set_text("")
           self.search.set_editable(True)
+          
+    def activate_search(self, widget=None, event=None, data=None):
+       if gtk.gdk.keyval_name(event.keyval) in ["Right", "Left"]:
+           return 
        else:
           self.showResults(self.getResults(self.search.get_text()))
           try:
@@ -543,7 +546,7 @@ class AppStore:
         
 
      
-    def isHiddenItem(self, label): #not implemented yet
+    def isHiddenItem(self, label):
         if label in hidden:
             return True
         return False
