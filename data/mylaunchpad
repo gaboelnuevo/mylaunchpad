@@ -400,7 +400,7 @@ class AppStore:
             button.set_size_request(ICON_SIZE+BUTTON_PADDING, ICON_SIZE+BUTTON_PADDING)
             button.show()
             box.pack_start(button, False, False, BUTTON_PADDING)
-            button.connect("button-press-event", self.click_button, item)
+            button.connect("button-release-event", self.click_button, item)
             button.connect("focus-in-event", self.in_focus)
             button.connect("focus-out-event", self.out_focus)
             labelString = item['label']
