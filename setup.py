@@ -17,7 +17,7 @@ except:
     
           
 setup(name="Launcher",  
-          version="0.2",  
+          version="0.3",  
           description="Eyecandy Full Screen launcher script for openbox and other stand-alone window managers.",  
           author="Gabriel Sabillon",  
           author_email="gabrielsabillon@gmail.com",  
