@@ -162,30 +162,56 @@ class AppStore:
         
         #add main container to main box
         mainbox.pack_start(self.mainContainer)
-
+        
         self.load("ALL")
         self.search.connect("key-release-event", self.activate_search)
         self.search.connect("key-press-event", self.enable_search)
+        self.search.set_editable(False)
+        self.window.set_focus(None)
         self.window.add(mainbox)
         self.window.maximize() # HOT FIX
 
     def on_keypress(self, widget, event):
-        if gtk.gdk.keyval_name(event.keyval) == "Right":
+        if gtk.gdk.keyval_name(event.keyval) == "Page_Down":
             self.window.set_focus(None)
             if self.cur_page < self.max_pages:
                 self.cur_page += 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
-        elif gtk.gdk.keyval_name(event.keyval) == "Left":
+        elif gtk.gdk.keyval_name(event.keyval) == "End":
+            self.window.set_focus(None)
+            if self.cur_page != self.max_pages:
+                self.cur_page = self.max_pages
+                self.navigate_page(None, None, self.apps, self.cur_page)
+        elif gtk.gdk.keyval_name(event.keyval) == "Home":
+            self.window.set_focus(None)
+            if self.cur_page != 1:
+                self.cur_page = 1
+                self.navigate_page(None, None, self.apps, self.cur_page)
+        elif gtk.gdk.keyval_name(event.keyval) == "Page_Up":
             self.window.set_focus(None)
             if self.cur_page > 1:
                 self.cur_page -= 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
-        elif self.search.get_text() in ["", "Start typing..."]:
+        elif (self.search.get_text() in ["", "Start typing..."] and not self.search.get_editable()) and gtk.gdk.keyval_name(event.keyval) in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+            if int(gtk.gdk.keyval_name(event.keyval)) <= self.max_pages:
+                self.cur_page = int(gtk.gdk.keyval_name(event.keyval))
+                self.navigate_page(None, None, self.apps, self.cur_page)
+        elif (self.search.get_text() in ["", "Start typing..."] or not self.search.get_editable()) and gtk.gdk.keyval_name(event.keyval) not in ["Left", "Right", "Up","Down", "Page_Up", "Page_Down", "Tab"]:
             self.window.set_focus(self.search)
         return
 
     def focus_window(self, widget, event):
         self.window.present()
+        
+    def showResults(self, results):
+        self.buttonContainer_size_w = self.buttonsContainer.get_allocation().width
+        self.buttonContainer_size_h = self.buttonsContainer.get_allocation().height
+        if self.buttonsContainer.get_children():
+           for widget in self.buttonsContainer.get_children():
+              self.buttonsContainer.remove(widget)
+           self.buttonsContainer.set_size_request(self.buttonContainer_size_w, self.buttonContainer_size_h) 
+        self.fill_buttonsContainer(results)   
+        self.buttonsContainer.show_all()
     #load apps
     def load(self, id_category):
         self.buttonContainer_size_w = self.buttonsContainer.get_allocation().width
@@ -197,26 +223,34 @@ class AppStore:
         apps = self.getApps(id_category)
         self.fill_buttonsContainer(apps)   
         self.buttonsContainer.show_all()
+        self.window.set_focus(None)
 
     def enter_callback(self, widget):
         self.run_command(self.getResults(self.search.get_text())[0]['command'])
         
+    def search_lost_focus(self, widget=None, event=None, data=None):
+        self.search.set_editable(False)
+        if not self.search.get_text():
+          self.search.set_text("Start typing...")
+        self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].grab_focus()
+        self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].set_relief(gtk.RELIEF_NORMAL)
+        
     def enable_search(self, widget=None, event=None, data=None):
-       if not self.search.get_editable():
-          self.search.set_text("")
+       if not self.search.get_editable() and gtk.gdk.keyval_name(event.keyval) not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+          if self.search.get_text() == "Start typing...":
+             self.search.set_text("")
           self.search.set_editable(True)
+          self.search.grab_focus()
           
     def activate_search(self, widget=None, event=None, data=None):
-       if gtk.gdk.keyval_name(event.keyval) in ["Right", "Left", "Tab"]:
+       if gtk.gdk.keyval_name(event.keyval) in ["Page_Down", "Page_Up","Left","Right","Up", "Down",  "Tab"]:
            return 
        else:
-          print gtk.gdk.keyval_name(event.keyval)
-          if self.search.get_text(): 
+          if self.search.get_text() and self.search.get_text() !=  "Start typing...": 
               self.showResults(self.getResults(self.search.get_text()))
           else:
               self.load("ALL")
           try:
-            #self.search.set_editable(False)
             #self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].grab_focus()
             self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].set_relief(gtk.RELIEF_NORMAL)
           except:
@@ -286,6 +320,8 @@ class AppStore:
         #self.search.set_property('can-focus', False)
         self.search.set_text("Start typing...")
         self.search.connect("activate", self.enter_callback)
+        self.search.connect("focus-out-event", self.search_lost_focus)
+        #self.search.connect("focus-in-event", self.enable_search)
         
         toolbar.pack_end(gtk.HBox())
         toolbar.pack_end(self.search, False, False, 5)
@@ -469,16 +505,6 @@ class AppStore:
                self.buttonsContainer.set_size_request(self.buttonContainer_size_w, self.buttonContainer_size_h) 
             self.fill_buttonsContainer(apps, Page=page) 
             self.buttonsContainer.show_all()
-
-    def showResults(self, results):
-        self.buttonContainer_size_w = self.buttonsContainer.get_allocation().width
-        self.buttonContainer_size_h = self.buttonsContainer.get_allocation().height
-        if self.buttonsContainer.get_children():
-           for widget in self.buttonsContainer.get_children():
-              self.buttonsContainer.remove(widget)
-           self.buttonsContainer.set_size_request(self.buttonContainer_size_w, self.buttonContainer_size_h) 
-        self.fill_buttonsContainer(results)   
-        self.buttonsContainer.show_all()
         
     def run_command(self, command):
          self.destroy()
@@ -618,7 +644,6 @@ class MyLauncher:
         self.logout_cmd = self.read_item_config('commands', 'logout', INTERNAL_MENU_LOGOUT_COMMAND)
         
         
-       
         # bgcolor and opacity
         self.opacity = OPACITY
         self.bgcolor = gtk.gdk.color_parse("black")
@@ -636,7 +661,6 @@ class MyLauncher:
                 return self.config.getboolean(section, option)
         return default
     
-    
     def quit(self, widget=None, data=None):
         export_favor()
         export_hidden()
@@ -648,7 +672,6 @@ class MyLauncher:
         if gtk.gdk.keyval_name(event.keyval) == "Escape":
             self.quit()
             
-
     def on_window_state_change(self, widget, event, *args):
         if event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN:
             self.window_in_fullscreen = True
@@ -779,3 +802,4 @@ class MyLauncher:
 
 launcher = MyLauncher()
 launcher.run_launcher()
+
