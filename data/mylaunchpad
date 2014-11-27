@@ -207,10 +207,14 @@ class AppStore:
           self.search.set_editable(True)
           
     def activate_search(self, widget=None, event=None, data=None):
-       if gtk.gdk.keyval_name(event.keyval) in ["Right", "Left"]:
+       if gtk.gdk.keyval_name(event.keyval) in ["Right", "Left", "Tab"]:
            return 
        else:
-          self.showResults(self.getResults(self.search.get_text()))
+          print gtk.gdk.keyval_name(event.keyval)
+          if self.search.get_text(): 
+              self.showResults(self.getResults(self.search.get_text()))
+          else:
+              self.load("ALL")
           try:
             #self.search.set_editable(False)
             #self.buttonsContainer.get_children()[0].get_children()[0].get_children()[0].grab_focus()
@@ -234,7 +238,7 @@ class AppStore:
         button = gtk.Button(" All ")
         button.category_id = "ALL"
         button.set_relief(gtk.RELIEF_NORMAL)
-        button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
+        button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
         button.set_focus_on_click(False)
         button.set_border_width(0)
         button.set_property('can-focus', False)
@@ -255,7 +259,6 @@ class AppStore:
            button.category_id = category['id']
            button.set_relief(gtk.RELIEF_NONE)
            button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
-     
            button.set_focus_on_click(False)
            button.set_border_width(0)
            button.set_property('can-focus', False)
@@ -268,6 +271,7 @@ class AppStore:
            self.btnshutdown = gtk.Button()
            self.btnshutdown.add(self.get_icon("system-shutdown-symbolic",24))
            self.btnshutdown.set_relief(gtk.RELIEF_NONE)
+           self.btnshutdown.set_property('can-focus', False)
            if not launcher.custom_power_manager or launcher.custom_power_manager == 'none' :
               self.btnshutdown.connect("clicked", self.get_shutdown_menu)
            else:
@@ -339,7 +343,7 @@ class AppStore:
                 button.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
                 button.set_focus_on_click(False)
                 button.set_border_width(0)
-                button.set_property('can-focus', True)
+                button.set_property('can-focus', False)
                 button.connect("button-press-event", self.navigate_page, lista, i)
                 label = gtk.Label()
                 label.set_use_markup(True)
@@ -439,7 +443,9 @@ class AppStore:
     def activate_category(self, widget, category_id):
         self.cur_page = 1
         self.cur_category = category_id
+        widget.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
         children = self.toolbar.get_children()
+        
         for x in children:
             try:
                 x.category_id
@@ -449,6 +455,7 @@ class AppStore:
                 x.set_relief(gtk.RELIEF_NORMAL)
             else:
                 x.set_relief(gtk.RELIEF_NONE)
+                x.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
         self.load(category_id)
 
     def navigate_page(self, widget, event, apps, page):
@@ -584,11 +591,10 @@ class AppStore:
        root = etree.parse(self.appsmenu)
        results = []
        for item in root.xpath("/xdg-menu/menu[@id]/item[contains(@label, '" + search + "') or contains(@id, '" + search + "') or contains(.//command, '" + search + "')]"):
-          results.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
+          if not self.isHiddenItem(item.attrib["label"]): 
+              results.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
        return results
     
-
-
 class MyLauncher:
     def __init__(self):
         global GOOGLE_SEARCH
@@ -773,4 +779,3 @@ class MyLauncher:
 
 launcher = MyLauncher()
 launcher.run_launcher()
-
