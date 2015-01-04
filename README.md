@@ -17,9 +17,10 @@ Credits:
 *Dependences:
   python-gmenu
   pygtk
-  pyhton-lxml
+  python-lxml
   python-cairo
   python-imaging
+  python-distutils-extra
 
 How to install:
 
