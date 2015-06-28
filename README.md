@@ -5,11 +5,11 @@ Eyecandy Full Screen launcher script for openbox and other stand-alone window ma
 
 Run with python and gtk/cairo
 
-Autor: Gabriel Sabillon
+Author: Gabriel Sabillon
 
 Contributors:
-  *Tsarev Nikita
-  *LoranKey
+-Tsarev Nikita
+-LoranKey
 
 Credits:
   Based in oblogout interface code by Andrew Williams and Archbang script for openbox pipe menu
