@@ -16,8 +16,8 @@ except:
     sys.exit(1)
     
           
-setup(name="Launcher",  
-          version="0.3",  
+setup(name="mylaunchpad",  
+          version="0.4",  
           description="Eyecandy Full Screen launcher script for openbox and other stand-alone window managers.",  
           author="Gabriel Sabillon",  
           author_email="gabrielsabillon@gmail.com",  

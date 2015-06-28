@@ -7,7 +7,9 @@ Run with python and gtk/cairo
 
 Autor: Gabriel Sabillon
 
-Contributor: Tsarev Nikita
+Contributors:
+  Tsarev Nikita
+  LoranKey
 
 
 Credits:

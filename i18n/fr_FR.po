@@ -1,0 +1,66 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: MyLaunchpad 0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-22 15:03+0200\n"
+"PO-Revision-Date: 2015-06-22 15:14+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Last-Translator: Loran <loran@w-n-e.net>\n"
+"Language-Team: MyLaunchpad_translate <loran@w-n-e.net>\n"
+"X-Generator: Poedit 1.8.1\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: fr_FR\n"
+"X-Poedit-SearchPath-0: mylaunchpad\n"
+
+#: mylaunchpad:339
+msgid " All "
+msgstr " Tous "
+
+#: mylaunchpad:349
+msgid " Favorites "
+msgstr " Favoris "
+
+#: mylaunchpad:598
+msgid "unfavorite"
+msgstr "supprimer des favoris"
+
+#: mylaunchpad:600
+msgid "favorite"
+msgstr "ajouter aux favoris"
+
+#: mylaunchpad:606
+msgid "hide"
+msgstr "cacher"
+
+#: mylaunchpad:608
+msgid "activate"
+msgstr "activer"
+
+#: mylaunchpad:619
+msgid "Shutdown"
+msgstr "Éteindre"
+
+#: mylaunchpad:624
+msgid "Reboot"
+msgstr "Redémarrer"
+
+#: mylaunchpad:629
+msgid "Suspend"
+msgstr "Veille"
+
+#: mylaunchpad:634
+msgid "Lock"
+msgstr "Vérouiller"
+
+#: mylaunchpad:639
+msgid "Logout"
+msgstr "Déconnexion"
