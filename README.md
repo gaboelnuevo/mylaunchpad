@@ -8,9 +8,8 @@ Run with python and gtk/cairo
 Autor: Gabriel Sabillon
 
 Contributors:
-  Tsarev Nikita
-  LoranKey
-
+  *Tsarev Nikita
+  *LoranKey
 
 Credits:
   Based in oblogout interface code by Andrew Williams and Archbang script for openbox pipe menu
