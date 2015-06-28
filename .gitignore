@@ -1,0 +1,6 @@
+*.pyc
+*.egg
+# Translations
+*.mo
+
+build/
