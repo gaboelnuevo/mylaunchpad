@@ -8,7 +8,9 @@ Run with python and gtk/cairo
 Author: Gabriel Sabillon
 
 Contributors:
+
 -Tsarev Nikita
+
 -LoranKey
 
 Credits:
