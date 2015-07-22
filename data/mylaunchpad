@@ -668,7 +668,7 @@ class AppStore:
     def getResults(self, search):
        root = etree.parse(self.appsmenu)
        results = []
-       for item in root.xpath("/xdg-menu/menu[@id]/item[contains(@label, '" + search + "') or contains(@id, '" + search + "') or contains(.//command, '" + search + "')]"):
+       for item in root.xpath("/xdg-menu/menu[@id]/item[contains(@label, '" + search + "') or contains(@id, '" + search + "') or contains(@icon, '" + search + "') or contains(translate(.//command, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + search + "'))]"):
           if not self.isHiddenItem(item.attrib["label"]): 
               results.append({'label': item.attrib["label"], 'icon': item.attrib["icon"], 'command': item.find(".//command").text})
        return results
