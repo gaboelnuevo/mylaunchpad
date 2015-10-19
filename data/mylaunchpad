@@ -353,6 +353,7 @@ class AppStore:
            #button = gtk.Button(' '+category['label']+' ')
            icon = self.get_icon(category['icon'])
            button.add(icon)
+           button.set_tooltip_text(category['label'])
            button.set_size_request(32, 32)
            button.category_id = category['id']
            button.set_relief(gtk.RELIEF_NONE)
