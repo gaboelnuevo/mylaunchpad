@@ -6,7 +6,7 @@ from xml.sax.saxutils import escape
 try:
    import gmenu
 except:
-    print "gmenu missing, please install pyhton-gmenu "
+    print "gmenu missing, please install python-gmenu "
 
 
 MENU_CACHE_FILE = "xdg-menu-cache.xml"
