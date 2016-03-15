@@ -819,8 +819,11 @@ class MyLauncher:
             self.logger.debug("Rendering Fade")
             # Convert Pixbuf to PIL Image
             wh = (pb.get_width(),pb.get_height())
-            pilimg = Image.fromstring("RGB", wh, pb.get_pixels())
-
+            try:
+                pilimg = Image.fromstring("RGB", wh, pb.get_pixels())
+            except:
+                pilimg = Image.frombuffer('RGBA', (w, h), pb.pixel_array, 'raw', 'RGBA', 0, 1)
+			
             pilimg = pilimg.point(lambda p: (p * self.opacity) / 255 )
 
             # "Convert" the PIL to Pixbuf via PixbufLoader
