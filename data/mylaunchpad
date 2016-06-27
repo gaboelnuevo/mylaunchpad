@@ -822,7 +822,7 @@ class MyLauncher:
             try:
                 pilimg = Image.fromstring("RGB", wh, pb.get_pixels())
             except:
-                pilimg = Image.frombuffer('RGBA', (w, h), pb.pixel_array, 'raw', 'RGBA', 0, 1)
+                pilimg = Image.frombuffer('RGBA', wh, pb.pixel_array, 'raw', 'RGBA', 0, 1)
 			
             pilimg = pilimg.point(lambda p: (p * self.opacity) / 255 )
 
