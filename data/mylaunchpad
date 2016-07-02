@@ -48,6 +48,7 @@ OPACITY = 90
 #default configuration
 POWER_BUTTON = True
 GOOGLE_SEARCH = True
+CATEGORIES_ICONS = True
 
 #default commands
 INTERNAL_MENU_SHUTDOWN_COMMAND = "sudo shutdown -h now"
@@ -320,11 +321,13 @@ class AppStore:
 
         toolbar.pack_start(gtk.HBox())
         # Add Categories as buttons
-        #button = gtk.Button( _(" All "))
-        button = gtk.Button()
-        icon = self.get_icon("user-home")
-        button.add(icon)
-        button.set_size_request(32, 32)
+        if not CATEGORIES_ICONS:
+            button = gtk.Button( _(" All "))
+        else:
+            button = gtk.Button()
+            icon = self.get_icon("user-home")
+            button.add(icon)
+            button.set_size_request(32, 32)
         button.category_id = "ALL"
         button.set_relief(gtk.RELIEF_NORMAL)
         button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
@@ -334,11 +337,13 @@ class AppStore:
         button.connect("clicked", self.activate_category, "ALL")
         toolbar.pack_start(button, False, False, 0)
 
-        #button = gtk.Button(_(" Favorites "))
-        button = gtk.Button()
-        icon = self.get_icon("user-bookmarks")
-        button.add(icon)
-        button.set_size_request(32, 32)
+        if not CATEGORIES_ICONS:
+            button = gtk.Button(_(" Favorites "))
+        else:
+            button = gtk.Button()
+            icon = self.get_icon("user-bookmarks")
+            button.add(icon)
+            button.set_size_request(32, 32)
 
         button.category_id = "FAVOR"
         button.set_relief(gtk.RELIEF_NONE)
@@ -350,11 +355,13 @@ class AppStore:
         toolbar.pack_start(button, False, False, 0)
         for category in categories:
            button = gtk.Button()
-           #button = gtk.Button(' '+category['label']+' ')
-           icon = self.get_icon(category['icon'])
-           button.add(icon)
-           button.set_tooltip_text(category['label'])
-           button.set_size_request(32, 32)
+           if not CATEGORIES_ICONS:
+               button = gtk.Button(' '+category['label']+' ')
+           else:
+               icon = self.get_icon(category['icon'])
+               button.add(icon)
+               button.set_tooltip_text(category['label'])
+               button.set_size_request(32, 32)
            button.category_id = category['id']
            button.set_relief(gtk.RELIEF_NONE)
            button.child.modify_fg(gtk.STATE_NORMAL, gtk.gdk.color_parse("white"))
@@ -688,6 +695,7 @@ class AppStore:
 class MyLauncher:
     def __init__(self):
         global GOOGLE_SEARCH
+        global CATEGORIES_ICONS
         # Start logger
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -701,6 +709,7 @@ class MyLauncher:
 
         self.power_button = self.read_bool_item_config('options', 'power_button', POWER_BUTTON)
         GOOGLE_SEARCH = self.read_bool_item_config('options', 'google_search', GOOGLE_SEARCH)
+        CATEGORIES_ICONS = self.read_bool_item_config('options', 'categories_icons', CATEGORIES_ICONS)
         self.custom_power_manager = self.read_item_config('options', 'custom_power_manager', 'none')
         self.xdg_menu =  self.read_item_config('options', 'xdg-menu', 'default')
 
