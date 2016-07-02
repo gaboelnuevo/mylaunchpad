@@ -48,7 +48,7 @@ OPACITY = 90
 #default configuration
 POWER_BUTTON = True
 GOOGLE_SEARCH = True
-CATEGORIES_ICONS = True
+CATEGORIES_ICONS = False
 
 #default commands
 INTERNAL_MENU_SHUTDOWN_COMMAND = "sudo shutdown -h now"
