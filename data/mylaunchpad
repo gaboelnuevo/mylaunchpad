@@ -175,7 +175,7 @@ class AppStore:
         self.window.stick()
         self.window.connect("key-press-event", self.on_keypress)
         self.window.connect("notify::is-active", self.focus_window)
-        self.window.connect('scroll-event', self.on_button_scroll_event)
+        self.window.connect("scroll-event", self.on_button_scroll_event)
         self.mainbox = mainbox
         self.cur_page = 1
         self.cur_category = "ALL"
@@ -232,7 +232,7 @@ class AppStore:
                 self.cur_page += 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
         elif event.direction == gtk.gdk.SCROLL_UP:
-              self.window.set_focus(None)
+            self.window.set_focus(None)
             if self.cur_page > 1:
                 self.cur_page -= 1
                 self.navigate_page(None, None, self.apps, self.cur_page)
