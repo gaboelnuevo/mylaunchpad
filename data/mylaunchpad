@@ -175,6 +175,7 @@ class AppStore:
         self.window.stick()
         self.window.connect("key-press-event", self.on_keypress)
         self.window.connect("notify::is-active", self.focus_window)
+        self.window.connect('scroll-event', self.on_button_scroll_event)
         self.mainbox = mainbox
         self.cur_page = 1
         self.cur_category = "ALL"
@@ -222,7 +223,20 @@ class AppStore:
         self.window.set_focus(None)
         self.window.add(mainbox)
         self.window.maximize() # HOT FIX
-
+        
+	#Scroll to change page
+    def on_button_scroll_event(self, widget, event):
+    	if event.direction == gtk.gdk.SCROLL_DOWN:
+            self.window.set_focus(None)
+            if self.cur_page < self.max_pages:
+                self.cur_page += 1
+                self.navigate_page(None, None, self.apps, self.cur_page)
+        elif event.direction == gtk.gdk.SCROLL_UP:
+              self.window.set_focus(None)
+            if self.cur_page > 1:
+                self.cur_page -= 1
+                self.navigate_page(None, None, self.apps, self.cur_page)
+                
     def on_keypress(self, widget, event):
         if gtk.gdk.keyval_name(event.keyval) == "Page_Down":
             self.window.set_focus(None)
